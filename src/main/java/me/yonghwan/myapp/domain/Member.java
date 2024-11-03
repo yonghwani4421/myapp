@@ -22,9 +22,9 @@ public class Member {
     private String address;
     private String addressDetail;
     private String zipCode;
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private Role role;
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private Verified verified;
     private LocalDateTime createDate;
     private LocalDateTime lastModifiedDate;
