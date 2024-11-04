@@ -14,10 +14,12 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
+    @Column(unique = true)
     private String email;
     private String password;
     private String name;
     private String phoneNum;
+    @Column(unique = true)
     private String nickName;
     private String address;
     private String addressDetail;
@@ -39,6 +41,6 @@ public class Member {
         this.address = memberDTO.getAddress();
         this.addressDetail = memberDTO.getAddressDetail();
         this.zipCode = memberDTO.getZipCode();
-        this.role = memberDTO.getRole();
+        this.role = Role.valueOf(memberDTO.getRole());
     }
 }
