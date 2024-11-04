@@ -2,10 +2,9 @@ package me.yonghwan.myapp.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import me.yonghwan.myapp.common.annotation.ValidEnum;
+import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.domain.Role;
 
 @Data
@@ -28,4 +27,19 @@ public class MemberRequest {
     private String zipCode;
     @ValidEnum(enumClass = Role.class, message = "유효하지 않습니다. [USER,ADMIN]")
     private Role role;
+
+    public Member toEntity(){
+        return Member.builder()
+                .email(email)
+                .password(password)
+                .name(name)
+                .phoneNum(phoneNum)
+                .nickName(nickName)
+                .address(address)
+                .addressDetail(addressDetail)
+                .zipCode(zipCode)
+                .role(role).build();
+    }
+
+
 }

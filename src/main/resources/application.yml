@@ -1,4 +1,8 @@
 spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
   datasource:
     url: jdbc:h2:tcp://localhost/~/jpashop
     username: sa
@@ -14,3 +18,22 @@ spring:
 logging.level:
   org.hibernate.SQL: debug
   org.hibernate.orm.jdbc.bind: trace #??? ?? 3.x, hibernate6
+#Email 인증
+mail:
+  host: smtp.gmail.com
+  port: 587
+  username: ghks4421@gmail.com
+  password: darh wvwh bzse wicf
+  supplier: gmail
+  from-mail: ghks4421@gmail.com
+  properties:
+    mail:
+      smtp:
+        auth: true
+        starttls:
+          enable: true
+          required: true
+        connectiontimeout: 5000
+        timeout: 5000
+        writetimeout: 5000
+  auth-code-expiration-millis: 1800000  # 30 * 60 * 1000 == 30?
