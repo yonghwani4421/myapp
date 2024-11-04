@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.yonghwan.myapp.common.codes.ErrorCode;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,7 +132,4 @@ public class ErrorResponse {
             this.reason = reason;
         }
     }
-
-
-
 }

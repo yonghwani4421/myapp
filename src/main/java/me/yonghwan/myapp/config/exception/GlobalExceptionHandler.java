@@ -5,6 +5,7 @@ import me.yonghwan.myapp.common.codes.ErrorCode;
 import me.yonghwan.myapp.common.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -22,7 +23,7 @@ public class GlobalExceptionHandler {
      * @param ex MethodArgumentNotValidException
      * @return ResponseEntity<ErrorResponse>
      */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({MethodArgumentNotValidException.class})
     protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         log.error("handleMethodArgumentNotValidException", ex);
         BindingResult bindingResult = ex.getBindingResult();
@@ -55,13 +56,13 @@ public class GlobalExceptionHandler {
      * @param ex HttpMessageNotReadableException
      * @return ResponseEntity<ErrorResponse>
      */
-//    @ExceptionHandler(HttpMessageNotReadableException.class)
-//    protected ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
-//            HttpMessageNotReadableException ex) {
-//        log.error("HttpMessageNotReadableException", ex);
-//        final ErrorResponse response = ErrorResponse.of(ErrorCode.REQUEST_BODY_MISSING_ERROR, ex.getMessage());
-//        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-//    }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    protected ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex) {
+        log.error("HttpMessageNotReadableException", ex);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.REQUEST_BODY_MISSING_ERROR, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
     /**
      * [Exception] 클라이언트에서 request로 '파라미터로' 데이터가 넘어오지 않았을 경우

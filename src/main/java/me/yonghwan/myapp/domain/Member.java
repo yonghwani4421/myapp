@@ -41,6 +41,6 @@ public class Member {
         this.address = memberDTO.getAddress();
         this.addressDetail = memberDTO.getAddressDetail();
         this.zipCode = memberDTO.getZipCode();
-        this.role = Role.valueOf(memberDTO.getRole());
+        this.role = memberDTO.getRole();
     }
 }
