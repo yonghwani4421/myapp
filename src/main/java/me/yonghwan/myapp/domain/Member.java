@@ -28,6 +28,7 @@ public class Member extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private Verified verified;
 
+
     public void update(String name, String phoneNum, String nickName, String address, String addressDetail, String zipCode){
         this.name = name;
         this.phoneNum = phoneNum;
