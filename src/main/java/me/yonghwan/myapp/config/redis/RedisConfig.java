@@ -1,5 +1,6 @@
 package me.yonghwan.myapp.config.redis;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 
 @Configuration
+@Slf4j
 public class RedisConfig {
     @Value("${spring.data.redis.host}")
     private String host;
@@ -24,9 +26,8 @@ public class RedisConfig {
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
-
-
-        System.out.println("redisTemplate = " + redisTemplate.toString());
+        log.info("## RedisConfig : {}", redisTemplate.getClass());
+//        System.out.println("redisTemplate = " + redisTemplate.toString());
         return redisTemplate;
     }
 }

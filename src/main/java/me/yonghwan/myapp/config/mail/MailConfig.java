@@ -1,7 +1,7 @@
 package me.yonghwan.myapp.config.mail;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -11,6 +11,7 @@ import java.util.Properties;
 
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class MailConfig {
 
     private final MailProperties mailProperties;
@@ -24,6 +25,8 @@ public class MailConfig {
         mailSender.setPassword(mailProperties.getPassword());
         mailSender.setJavaMailProperties(getMailProperties());
         mailSender.setDefaultEncoding("UTF-8");
+
+        log.info("## JavaMailSender : {}", mailSender.getClass());
 
         return mailSender;
     }

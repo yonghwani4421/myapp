@@ -3,7 +3,6 @@ package me.yonghwan.myapp.common.annotation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-import java.lang.annotation.Annotation;
 
 public class EnumValidator implements ConstraintValidator<ValidEnum, Enum> {
     private ValidEnum annotation;
