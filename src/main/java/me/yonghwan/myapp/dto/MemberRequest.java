@@ -2,6 +2,7 @@ package me.yonghwan.myapp.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 import lombok.Data;
 import me.yonghwan.myapp.common.annotation.ValidEnum;
 import me.yonghwan.myapp.domain.Member;
@@ -27,6 +28,19 @@ public class MemberRequest {
     private String zipCode;
     @ValidEnum(enumClass = Role.class, message = "유효하지 않습니다. [USER,ADMIN]")
     private Role role;
+
+    @Builder
+    public MemberRequest(String email, String password, String name, String phoneNum, String nickName, String address, String addressDetail, String zipCode, Role role) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.phoneNum = phoneNum;
+        this.nickName = nickName;
+        this.address = address;
+        this.addressDetail = addressDetail;
+        this.zipCode = zipCode;
+        this.role = role;
+    }
 
     public Member toEntity(){
         return Member.builder()

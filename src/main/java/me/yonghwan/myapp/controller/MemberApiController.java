@@ -9,6 +9,8 @@ import me.yonghwan.myapp.dto.MemberRequest;
 import me.yonghwan.myapp.dto.MemberResponse;
 import me.yonghwan.myapp.dto.MemberUpdateRequest;
 import me.yonghwan.myapp.service.MemberService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,12 +21,23 @@ import java.util.stream.Collectors;
 public class MemberApiController {
     private final MemberService memberService;
 
+//    @PostMapping("/api/members")
+//    public ApiResponse<MemberResponse> memberJoin(@RequestBody @Valid MemberRequest request){
+//        Member member = memberService.save(request);
+//        return ApiResponse.<MemberResponse>builder().result(new MemberResponse(member))
+//                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
+//                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage()).build();
+//    }
     @PostMapping("/api/members")
-    public ApiResponse<MemberResponse> memberJoin(@RequestBody @Valid MemberRequest request){
+    public ResponseEntity<ApiResponse<MemberResponse>> memberJoin(@RequestBody @Valid MemberRequest request) {
         Member member = memberService.save(request);
-        return ApiResponse.<MemberResponse>builder().result(new MemberResponse(member))
+        ApiResponse<MemberResponse> response = ApiResponse.<MemberResponse>builder()
+                .result(new MemberResponse(member))
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage()).build();
+                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .build();
+
+        return ResponseEntity.status(SuccessCode.INSERT_SUCCESS.getStatus()).body(response);
     }
     @PutMapping("/api/members/{id}")
     public ApiResponse<MemberResponse> updateMember(@PathVariable("id") Long id,
@@ -38,15 +51,17 @@ public class MemberApiController {
     }
 
     @GetMapping("/api/members")
-    public ApiResponse<List<MemberResponse>> getMembers(){
+    public ResponseEntity<ApiResponse<List<MemberResponse>>> getMembers(){
         List<Member> findMembers = memberService.findMembers();
         List<MemberResponse> collect = findMembers.stream()
-                .map(m -> new MemberResponse(m.getId(),m.getEmail(),m.getName(),m.getPhoneNum(),m.getNickName(),m.getAddress(),m.getRole()))
+                .map(MemberResponse::new)
                 .collect(Collectors.toList());
 
-        return ApiResponse.<List<MemberResponse>>builder().result(collect)
+        ApiResponse<List<MemberResponse>> response = ApiResponse.<List<MemberResponse>>builder().result(collect)
                 .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage()).build();
+
+        return ResponseEntity.status(SuccessCode.SELECT_SUCCESS.getStatus()).body(response);
     }
 
     @GetMapping("/api/members/{id}")

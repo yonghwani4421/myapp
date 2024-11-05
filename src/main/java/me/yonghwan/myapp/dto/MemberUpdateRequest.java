@@ -1,6 +1,7 @@
 package me.yonghwan.myapp.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
@@ -18,4 +19,13 @@ public class MemberUpdateRequest {
     @NotBlank(message = "우편번호를 입력하세요.")
     private String zipCode;
 
+    @Builder
+    public MemberUpdateRequest(String name, String phoneNum, String nickName, String address, String addressDetail, String zipCode) {
+        this.name = name;
+        this.phoneNum = phoneNum;
+        this.nickName = nickName;
+        this.address = address;
+        this.addressDetail = addressDetail;
+        this.zipCode = zipCode;
+    }
 }
