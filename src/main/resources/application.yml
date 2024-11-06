@@ -1,4 +1,7 @@
 spring:
+  jwt:
+    secret: dydghksdydghksdydghksdydghksaaaaaaaaaaaaaaaaa
+    header: Authorization
   data:
     redis:
       host: localhost

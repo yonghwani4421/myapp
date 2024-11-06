@@ -2,20 +2,17 @@ package me.yonghwan.myapp.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import me.yonghwan.myapp.domain.Member;
-import me.yonghwan.myapp.domain.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 @RequiredArgsConstructor
 @Getter
 public class CustomMemberDetails implements UserDetails {
 
-    private final Member member;
+    private final LoginMember loginMember;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
@@ -24,7 +21,7 @@ public class CustomMemberDetails implements UserDetails {
         collection.add(new GrantedAuthority(){
             @Override
             public String getAuthority(){
-                return String.valueOf(member.getRole());
+                return String.valueOf(loginMember.getRole());
             }
         });
         return collection;
@@ -32,12 +29,12 @@ public class CustomMemberDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return member.getPassword();
+        return loginMember.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return member.getEmail();
+        return loginMember.getEmail();
     }
 
     @Override
