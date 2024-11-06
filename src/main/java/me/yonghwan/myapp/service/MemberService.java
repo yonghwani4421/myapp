@@ -5,6 +5,7 @@ import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.dto.MemberRequest;
 import me.yonghwan.myapp.dto.MemberUpdateRequest;
 import me.yonghwan.myapp.repository.MemberRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.Optional;
 @Transactional(readOnly = false)
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     /**
      * 회원 등록
@@ -24,7 +26,7 @@ public class MemberService {
      */
     @Transactional
     public Member save(MemberRequest request){
-        return memberRepository.save(request.toEntity());
+        return memberRepository.save(request.toEntity(bCryptPasswordEncoder));
     }
 
     /**

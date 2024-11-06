@@ -21,13 +21,6 @@ import java.util.stream.Collectors;
 public class MemberApiController {
     private final MemberService memberService;
 
-//    @PostMapping("/api/members")
-//    public ApiResponse<MemberResponse> memberJoin(@RequestBody @Valid MemberRequest request){
-//        Member member = memberService.save(request);
-//        return ApiResponse.<MemberResponse>builder().result(new MemberResponse(member))
-//                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
-//                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage()).build();
-//    }
     @PostMapping("/api/members")
     public ResponseEntity<ApiResponse<MemberResponse>> memberJoin(@RequestBody @Valid MemberRequest request) {
         Member member = memberService.save(request);
@@ -40,14 +33,17 @@ public class MemberApiController {
         return ResponseEntity.status(SuccessCode.INSERT_SUCCESS.getStatus()).body(response);
     }
     @PutMapping("/api/members/{id}")
-    public ApiResponse<MemberResponse> updateMember(@PathVariable("id") Long id,
+    public ResponseEntity<ApiResponse<MemberResponse>> updateMember(@PathVariable("id") Long id,
                                                     @RequestBody @Valid MemberUpdateRequest request){
         memberService.update(request,id);
         Member findMember = memberService.findById(id);
 
-        return ApiResponse.<MemberResponse>builder().result(new MemberResponse(findMember))
+        ApiResponse<MemberResponse> response = ApiResponse.<MemberResponse>builder().result(new MemberResponse(findMember))
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.UPDATE_SUCCESS.getMessage()).build();
+
+
+        return ResponseEntity.status(SuccessCode.UPDATE_SUCCESS.getStatus()).body(response);
     }
 
     @GetMapping("/api/members")
@@ -65,12 +61,14 @@ public class MemberApiController {
     }
 
     @GetMapping("/api/members/{id}")
-    public ApiResponse<MemberResponse> getMember(@PathVariable("id") Long id){
+    public ResponseEntity<ApiResponse<MemberResponse>> getMember(@PathVariable("id") Long id){
         Member member = memberService.findById(id);
 
-        return ApiResponse.<MemberResponse>builder().result(new MemberResponse(member))
+        ApiResponse<MemberResponse> response = ApiResponse.<MemberResponse>builder().result(new MemberResponse(member))
                 .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage()).build();
+
+        return ResponseEntity.status(SuccessCode.SELECT_SUCCESS.getStatus()).body(response);
     }
 
 }

@@ -4,12 +4,16 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import me.yonghwan.myapp.common.annotation.ValidEnum;
 import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.domain.Role;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Data
+@RequiredArgsConstructor
 public class MemberRequest {
+
     @Email @NotBlank(message = "이메일을 입력하세요.")
     private String email;
     @NotBlank(message = "비밀번호를 입력하세요.")
@@ -42,10 +46,10 @@ public class MemberRequest {
         this.role = role;
     }
 
-    public Member toEntity(){
+    public Member toEntity(BCryptPasswordEncoder bCryptPasswordEncoder){
         return Member.builder()
                 .email(email)
-                .password(password)
+                .password(bCryptPasswordEncoder.encode(password))
                 .name(name)
                 .phoneNum(phoneNum)
                 .nickName(nickName)
