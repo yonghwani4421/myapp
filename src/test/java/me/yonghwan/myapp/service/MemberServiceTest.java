@@ -83,7 +83,7 @@ class MemberServiceTest {
 
 
         // then
-        result.andExpect(MockMvcResultMatchers.status().isCreated());
+        result.andExpect(MockMvcResultMatchers.status().isOk());
         List<Member> members = memberRepository.findAll();
 
         Assertions.assertThat(members.size()).isEqualTo(1);

@@ -2,7 +2,6 @@ package me.yonghwan.myapp.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import me.yonghwan.myapp.domain.Address;
 import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.domain.Role;

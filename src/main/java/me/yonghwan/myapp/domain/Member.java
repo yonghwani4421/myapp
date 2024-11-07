@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -25,8 +28,12 @@ public class Member extends BaseTimeEntity{
     private Address address;
     @Enumerated(EnumType.STRING)
     private Role role;
-//    @Enumerated(EnumType.STRING)
-//    private Verified verified;
+
+    /**
+     * keyword 양방향 관계
+     */
+    @OneToMany(mappedBy = "member")
+    private List<KeyWord> keyWords = new ArrayList<>();
 
 
     public void update(String name, String phoneNum, String nickName, String address, String addressDetail, String zipCode){
