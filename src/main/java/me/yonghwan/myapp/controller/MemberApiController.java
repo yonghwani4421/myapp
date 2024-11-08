@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.yonghwan.myapp.common.codes.SuccessCode;
 import me.yonghwan.myapp.common.response.ApiResponse;
-import me.yonghwan.myapp.domain.KeyWord;
+import me.yonghwan.myapp.domain.Keyword;
 import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.dto.*;
 import me.yonghwan.myapp.helper.SessionUtil;
@@ -23,8 +23,6 @@ public class MemberApiController {
     private final KeyWordSerive keyWordSerive;
     private final MemberRepository memberRepository;
     private final SessionUtil sessionUtil;
-
-
 
     @PostMapping("/api/members")
     public ApiResponse<MemberResponse> memberJoin(@RequestBody @Valid MemberRequest request) {
@@ -69,14 +67,26 @@ public class MemberApiController {
     public ApiResponse<List<KeywordDto>> saveKeywords(@RequestBody List<KeywordDto> request) throws Exception {
         Member member = sessionUtil.getMemberSesson();
         return ApiResponse.<List<KeywordDto>>builder().result(keyWordSerive.saveList(request.stream()
-                    .map(o -> KeyWord.builder().content(o.getContent()).member(member).build())
+                    .map(o -> Keyword.builder().content(o.getContent()).member(member).build())
                     .collect(Collectors.toList()))).resultCode(SuccessCode.INSERT_SUCCESS.getStatus()).resultMsg(SuccessCode.INSERT_SUCCESS.getMessage()).build();
     }
-//    @GetMapping("/api/members/keywords")
-//    public ApiResponse<List<KeywordDto>> saveKeywords() throws Exception {
-//        Member member = sessionUtil.getMemberSesson();
-//
-//
-//        return ApiResponse.<List<KeywordDto>>builder().result().resultCode(SuccessCode.INSERT_SUCCESS.getStatus()).resultMsg(SuccessCode.INSERT_SUCCESS.getMessage()).build();
-//    }
+    @GetMapping("/api/members/keywords")
+    public ApiResponse<List<KeywordDto>> saveKeywords() throws Exception {
+        Member member = sessionUtil.getMemberSesson();
+        return ApiResponse.<List<KeywordDto>>builder()
+                .result( keyWordSerive.findByMemberId(member.getId()))
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage()).build();
+    }
+
+    @DeleteMapping("/api/members/keywords")
+    public ApiResponse<Integer> deleteKeywords() throws Exception {
+        Member member = sessionUtil.getMemberSesson();
+
+        keyWordSerive.deleteAll(member.getId());
+        return ApiResponse.<Integer>builder()
+                .result(SuccessCode.DELETE_SUCCESS.ordinal())
+                .resultCode(SuccessCode.DELETE_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.DELETE_SUCCESS.getMessage()).build();
+    }
 }

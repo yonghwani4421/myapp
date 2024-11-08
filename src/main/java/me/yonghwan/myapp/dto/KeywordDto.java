@@ -7,11 +7,13 @@ import lombok.Data;
 
 @Data
 public class KeywordDto {
+    private Long id;
     private String content;
 
     @JsonCreator
     @Builder
-    public KeywordDto(@JsonProperty("content") String content) {
+    public KeywordDto(@JsonProperty("id") Long id,@JsonProperty("content") String content) {
+        this.id = id;
         this.content = content;
     }
 

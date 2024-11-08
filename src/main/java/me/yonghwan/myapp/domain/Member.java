@@ -32,8 +32,9 @@ public class Member extends BaseTimeEntity{
     /**
      * keyword 양방향 관계
      */
-    @OneToMany(mappedBy = "member")
-    private List<KeyWord> keyWords = new ArrayList<>();
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Keyword> keyWords = new ArrayList<>();
+
 
 
     public void update(String name, String phoneNum, String nickName, String address, String addressDetail, String zipCode){
