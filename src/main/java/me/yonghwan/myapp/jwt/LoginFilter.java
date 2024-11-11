@@ -1,5 +1,6 @@
 package me.yonghwan.myapp.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,7 +8,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.yonghwan.myapp.common.codes.SuccessCode;
+import me.yonghwan.myapp.common.response.ApiResponse;
+import me.yonghwan.myapp.domain.Member;
+import me.yonghwan.myapp.domain.RefreshToken;
 import me.yonghwan.myapp.dto.CustomMemberDetails;
+import me.yonghwan.myapp.dto.TokenDto;
+import me.yonghwan.myapp.repository.MemberRepository;
+import me.yonghwan.myapp.repository.RefreshTokenRepository;
+import me.yonghwan.myapp.service.MemberService;
+import me.yonghwan.myapp.service.RefreshTokenService;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +32,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -30,6 +43,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final JWTUtil jwtUtil;
 
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    private final MemberRepository memberRepository;
 
 
     @Override
@@ -80,13 +96,38 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         // role
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt(email, role, Duration.ofMinutes(3).toMillis());
-
-        response.addHeader("Authorization","Bearer " + token);
+        String accessToken = jwtUtil.createJwt(email, role, Duration.ofMinutes(3).toMillis());
 
 
+        Member findMember = memberRepository.findByEmail(email).orElseThrow(()-> new IllegalArgumentException("not found : " + email ));
 
+        // 최초 지급
+        RefreshToken findToken = refreshTokenRepository.findByMemberId(findMember.getId())
+                .orElseGet(() -> {
+                    return createRefreshToken(email, role, findMember);
+                });
+        // 만료되었을때
+        if (jwtUtil.isExpired(findToken.getRefreshToken())){
+            createRefreshToken(email, role, findMember);
+        }
 
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        response.getWriter().write(jwtUtil.objectMapper().writeValueAsString(ApiResponse.builder()
+                .result(
+                        new TokenDto(accessToken,findToken.getRefreshToken(),"Bearer")
+                        )
+                .resultCode(HttpStatus.OK.value())
+                .resultMsg(HttpStatus.OK.getReasonPhrase()).build()));
+
+    }
+
+    private RefreshToken createRefreshToken(String email, String role, Member findMember) {
+        String refreshToken = jwtUtil.createJwt(email, role, Duration.ofDays(15).toMillis());
+        return refreshTokenRepository.save(RefreshToken.builder()
+                .member(findMember)
+                .refreshToken(refreshToken).build());
     }
 
     /**

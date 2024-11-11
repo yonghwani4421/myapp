@@ -6,10 +6,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.yonghwan.myapp.common.response.ApiResponse;
 import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.domain.Role;
 import me.yonghwan.myapp.dto.CustomMemberDetails;
 import me.yonghwan.myapp.dto.LoginMember;
+import me.yonghwan.myapp.repository.RefreshTokenRepository;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +24,7 @@ import java.io.IOException;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 

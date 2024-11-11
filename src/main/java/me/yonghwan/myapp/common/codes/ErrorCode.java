@@ -47,6 +47,9 @@ public enum ErrorCode {
     // 권한이 없음
     FORBIDDEN_ERROR(403, "G008", "Forbidden Exception"),
 
+    // jwt 토큰 만료
+    JWTTOKEN_ERROR(403, "G0013", "Access token expired."),
+
     // 서버로 요청한 리소스가 존재하지 않음
     NOT_FOUND_ERROR(404, "G009", "Not Found Exception"),
 

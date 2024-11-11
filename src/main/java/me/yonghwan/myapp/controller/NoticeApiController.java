@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import me.yonghwan.myapp.common.codes.SuccessCode;
 import me.yonghwan.myapp.common.response.ApiResponse;
 import me.yonghwan.myapp.domain.Notice;
-import me.yonghwan.myapp.dto.MemberResponse;
 import me.yonghwan.myapp.dto.NoticeDto;
 import me.yonghwan.myapp.service.NoticeService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NoticeApiController {
 
     private final NoticeService noticeService;
-    @PostMapping("/api/notice")
+    @PostMapping("/api/admin/notice")
     public ApiResponse<NoticeDto> notice(@RequestBody @Valid NoticeDto request) {
         Notice notice = noticeService.save(request.toEntity());
 

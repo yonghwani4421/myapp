@@ -1,5 +1,6 @@
 package me.yonghwan.myapp.config.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import me.yonghwan.myapp.common.codes.ErrorCode;
 import me.yonghwan.myapp.common.response.ErrorResponse;
@@ -62,6 +63,35 @@ public class GlobalExceptionHandler {
         log.error("HttpMessageNotReadableException", ex);
         final ErrorResponse response = ErrorResponse.of(ErrorCode.REQUEST_BODY_MISSING_ERROR, ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+    /**
+     * [Exception] 클라이언트에서 token이 만료된 경우
+     *
+     * @param ex ExpiredJwtException
+     * @return ResponseEntity<ErrorResponse>
+     */
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    protected ResponseEntity<ErrorResponse> expiredJwtException(
+            ExpiredJwtException ex) {
+        log.error("ExpiredJwtException", ex);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.REQUEST_BODY_MISSING_ERROR, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    /**
+     * [Exception] 클라이언트에서 refresh token이 만료된 경우
+     *
+     * @param ex RefreshTokenExpiredException
+     * @return ResponseEntity<ErrorResponse>
+     */
+
+    @ExceptionHandler(RefreshTokenExpiredException.class)
+    protected ResponseEntity<ErrorResponse> refreshTokenExpiredException(
+            RefreshTokenExpiredException ex) {
+        log.error("RefreshTokenExpiredException", ex);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.REQUEST_BODY_MISSING_ERROR, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
     /**

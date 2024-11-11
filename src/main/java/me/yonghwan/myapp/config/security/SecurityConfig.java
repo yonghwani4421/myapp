@@ -1,9 +1,12 @@
 package me.yonghwan.myapp.config.security;
 
 import lombok.RequiredArgsConstructor;
+import me.yonghwan.myapp.domain.RefreshToken;
 import me.yonghwan.myapp.jwt.JWTFilter;
 import me.yonghwan.myapp.jwt.JWTUtil;
 import me.yonghwan.myapp.jwt.LoginFilter;
+import me.yonghwan.myapp.repository.MemberRepository;
+import me.yonghwan.myapp.repository.RefreshTokenRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +24,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final AuthenticationConfiguration configuration;
     private final JWTUtil jwtUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final MemberRepository memberRepository;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -57,12 +62,12 @@ public class SecurityConfig {
 
         // 인가 작업
         http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/login", "/","/api/members").permitAll()
+                .requestMatchers("/login", "/","/api/members","/api/token").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated());
 
-        http.addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
-        http.addFilterAt(new LoginFilter(authenticationManager(configuration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JWTFilter(jwtUtil,refreshTokenRepository), LoginFilter.class);
+        http.addFilterAt(new LoginFilter(authenticationManager(configuration),jwtUtil,refreshTokenRepository,memberRepository), UsernamePasswordAuthenticationFilter.class);
 
         // 세션 설정 STATELESS 상태로 유지할것
         http
