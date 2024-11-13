@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import me.yonghwan.myapp.dto.NoticeDto;
 
 @Entity
 @Getter
@@ -27,5 +28,10 @@ public class Notice extends BaseTimeEntity{
         this.title = title;
         this.content = content;
         this.member = member;
+    }
+
+    public void changeNotice(NoticeDto noticeDto) {
+        this.title = noticeDto.getTitle();
+        this.content = noticeDto.getContent();
     }
 }
