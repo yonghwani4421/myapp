@@ -26,6 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
@@ -86,6 +87,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         CustomMemberDetails customMemberDetails = (CustomMemberDetails) authentication.getPrincipal();
 
+
         // email
         String email = customMemberDetails.getUsername();
 
@@ -95,6 +97,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // role
         String role = auth.getAuthority();
+        log.info("## role : {}" , role);
 
         String accessToken = jwtUtil.createJwt(email, role, Duration.ofMinutes(3).toMillis());
 

@@ -1,7 +1,6 @@
 package me.yonghwan.myapp.config.security;
 
 import lombok.RequiredArgsConstructor;
-import me.yonghwan.myapp.domain.RefreshToken;
 import me.yonghwan.myapp.jwt.JWTFilter;
 import me.yonghwan.myapp.jwt.JWTUtil;
 import me.yonghwan.myapp.jwt.LoginFilter;
@@ -63,7 +62,7 @@ public class SecurityConfig {
         // 인가 작업
         http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/login", "/","/api/members","/api/token").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated());
 
         http.addFilterBefore(new JWTFilter(jwtUtil,refreshTokenRepository), LoginFilter.class);
@@ -76,5 +75,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 }

@@ -17,6 +17,12 @@ public class NoticeDto {
         this.content = content;
     }
 
+    public NoticeDto(Notice notice) {
+        this.id = notice.getId();
+        this.title = notice.getTitle();
+        this.content = notice.getContent();
+    }
+
     public Notice toEntity(){
         return Notice.builder()
                 .title(this.title)
