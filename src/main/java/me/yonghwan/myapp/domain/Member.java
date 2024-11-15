@@ -35,6 +35,24 @@ public class Member extends BaseTimeEntity{
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Keyword> keyWords = new ArrayList<>();
 
+    /**
+     * manner 양방향 관계
+     */
+    @OneToMany(mappedBy = "giver", cascade =CascadeType.ALL, orphanRemoval = true)
+    private List<Manner> givers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "receiver", cascade =CascadeType.ALL, orphanRemoval = true)
+    private List<Manner> receiver = new ArrayList<>();
+
+
+    /**
+     * 나의 매너 점수를 계산해주는 함수
+     * @return
+     */
+    public long calculateMannerScore(){
+        return this.receiver.stream().mapToInt(Manner::getScore).sum() / this.receiver.size();
+    }
+
 
 
     public void update(String name, String phoneNum, String nickName, String address, String addressDetail, String zipCode){

@@ -8,10 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
 
+    @Transactional
     public void save(RefreshToken refreshToken){
         refreshTokenRepository.save(refreshToken);
     }

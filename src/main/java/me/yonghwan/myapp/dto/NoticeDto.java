@@ -1,5 +1,6 @@
 package me.yonghwan.myapp.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import me.yonghwan.myapp.domain.Notice;
 
@@ -10,6 +11,11 @@ public class NoticeDto {
     private String content;
 
     public NoticeDto(){}
+
+    public NoticeDto(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 
     public NoticeDto(Long id, String title, String content) {
         this.id = id;
