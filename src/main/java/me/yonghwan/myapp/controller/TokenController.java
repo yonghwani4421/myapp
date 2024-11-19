@@ -1,20 +1,21 @@
 package me.yonghwan.myapp.controller;
 
-import io.jsonwebtoken.ExpiredJwtException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.yonghwan.myapp.common.codes.SuccessCode;
-import me.yonghwan.myapp.common.response.ApiResponse;
+import me.yonghwan.myapp.common.response.CommonResponse;
 import me.yonghwan.myapp.config.exception.BusinessException;
 import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.domain.RefreshToken;
-import me.yonghwan.myapp.dto.NoticeDto;
 import me.yonghwan.myapp.dto.TokenDto;
-import me.yonghwan.myapp.helper.SessionUtil;
 import me.yonghwan.myapp.jwt.JWTUtil;
 import me.yonghwan.myapp.repository.RefreshTokenRepository;
 import me.yonghwan.myapp.service.MemberService;
-import me.yonghwan.myapp.service.RefreshTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +27,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Token", description = "Token API")
 @Slf4j
 public class TokenController {
 
@@ -34,8 +36,13 @@ public class TokenController {
 
     private final MemberService memberService;
 
+    @Operation(summary = "토큰 발급", description = "jwt 토큰을 발급합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
+            @ApiResponse(responseCode = "400", description = "조회 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
+    })
     @GetMapping("/api/token")
-    public ApiResponse<TokenDto> createToken(@RequestBody Map<String,String> requestBody) throws Exception {
+    public CommonResponse<TokenDto> createToken(@RequestBody Map<String,String> requestBody) throws Exception {
         String refreshToken = requestBody.get("refreshToken");
         Optional<RefreshToken> optionalToken = refreshTokenRepository.findByRefreshToken(refreshToken);
 
@@ -46,7 +53,7 @@ public class TokenController {
         if (optionalToken.isPresent() && !jwtUtil.isExpired(optionalToken.get().getRefreshToken())){
             // access token 발급
             TokenDto response = new TokenDto(jwtUtil.createJwt(member.getEmail(), String.valueOf(member.getRole()), Duration.ofMinutes(3).toMillis()), optionalToken.get().getRefreshToken(), "Baerer");
-            return ApiResponse.<TokenDto>builder()
+            return CommonResponse.<TokenDto>builder()
                     .result(response)
                     .resultCode(HttpStatus.OK.value())
                     .resultMsg(HttpStatus.OK.getReasonPhrase())

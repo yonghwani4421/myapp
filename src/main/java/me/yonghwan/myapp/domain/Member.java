@@ -50,7 +50,12 @@ public class Member extends BaseTimeEntity{
      * @return
      */
     public long calculateMannerScore(){
-        return this.receiver.stream().mapToInt(Manner::getScore).sum() / this.receiver.size();
+        if (!this.receiver.isEmpty()){
+            System.out.println("###################### this.receiver.size() = " + this.receiver.size());
+            return this.receiver.stream().mapToInt(Manner::getScore).sum() / this.receiver.size();
+        } else {
+            return 0L;
+        }
     }
 
 

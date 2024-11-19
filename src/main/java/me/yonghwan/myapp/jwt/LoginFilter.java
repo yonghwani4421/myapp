@@ -1,40 +1,30 @@
 package me.yonghwan.myapp.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.yonghwan.myapp.common.codes.SuccessCode;
-import me.yonghwan.myapp.common.response.ApiResponse;
+import me.yonghwan.myapp.common.response.CommonResponse;
 import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.domain.RefreshToken;
 import me.yonghwan.myapp.dto.CustomMemberDetails;
 import me.yonghwan.myapp.dto.TokenDto;
 import me.yonghwan.myapp.repository.MemberRepository;
 import me.yonghwan.myapp.repository.RefreshTokenRepository;
-import me.yonghwan.myapp.service.MemberService;
-import me.yonghwan.myapp.service.RefreshTokenService;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -117,7 +107,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        response.getWriter().write(jwtUtil.objectMapper().writeValueAsString(ApiResponse.builder()
+        response.getWriter().write(jwtUtil.objectMapper().writeValueAsString(CommonResponse.builder()
                 .result(
                         new TokenDto(accessToken,findToken.getRefreshToken(),"Bearer")
                         )

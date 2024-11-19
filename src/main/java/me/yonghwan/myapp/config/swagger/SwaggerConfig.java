@@ -12,14 +12,16 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
-        String jwt = "JWT";
+        String jwt = "Authorization";
         SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwt);
         Components components = new Components().addSecuritySchemes(jwt, new SecurityScheme()
                 .name(jwt)
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
                 .bearerFormat("JWT")
-        );
+                .in(SecurityScheme.In.HEADER)
+                .description(
+                        "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""));
         return new OpenAPI()
                 .components(new Components())
                 .info(apiInfo())

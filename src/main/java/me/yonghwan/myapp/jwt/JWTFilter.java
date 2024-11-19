@@ -6,8 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.yonghwan.myapp.common.response.ApiResponse;
-import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.domain.Role;
 import me.yonghwan.myapp.dto.CustomMemberDetails;
 import me.yonghwan.myapp.dto.LoginMember;
