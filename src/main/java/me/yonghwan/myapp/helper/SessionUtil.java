@@ -1,6 +1,7 @@
 package me.yonghwan.myapp.helper;
 
 import lombok.RequiredArgsConstructor;
+import me.yonghwan.myapp.config.exception.BusinessException;
 import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.dto.CustomMemberDetails;
 import me.yonghwan.myapp.repository.MemberRepository;
@@ -19,13 +20,25 @@ public class SessionUtil {
      * @return
      * @throws Exception
      */
-    public Member getMemberSesson() throws Exception {
+    public Member getMemberSesson() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.getPrincipal() instanceof CustomMemberDetails)
             // 사용자를 가져온다.
             return memberService.findByEmail(((CustomMemberDetails) authentication.getPrincipal()).getUsername());
         else
-            throw new Exception("세션만료!!");
+            throw new BusinessException("session load fail");
+    }
+
+
+
+    public String getEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof CustomMemberDetails)
+            // 사용자를 가져온다.
+            return ((CustomMemberDetails) authentication.getPrincipal()).getUsername();
+        else
+            throw new BusinessException("session load fail");
     }
 }
