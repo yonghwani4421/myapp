@@ -62,9 +62,12 @@ public class SecurityConfig {
         // 인가 작업
         http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/login", "/","/api/members" ,"/api/token").permitAll()
+                .requestMatchers("/login", "/","/api/members" ,"/api/token","/logout").permitAll()
                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated());
+
+        // 로그아웃 비활성화
+        http.logout((auth) -> auth.disable());
 
         http.addFilterBefore(new JWTFilter(jwtUtil,refreshTokenRepository), LoginFilter.class);
         http.addFilterAt(new LoginFilter(authenticationManager(configuration),jwtUtil,refreshTokenRepository,memberRepository), UsernamePasswordAuthenticationFilter.class);

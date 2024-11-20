@@ -20,4 +20,14 @@ public class RefreshTokenService {
     public RefreshToken findByRefreshToken(String refreshToken){
         return refreshTokenRepository.findByRefreshToken(refreshToken).orElseThrow(()->new IllegalArgumentException("not  found : "+ refreshToken));
     }
+
+    @Transactional
+    public void deleteAllByMemberId(Long memberId){
+        refreshTokenRepository.deleteAllByMemberId(memberId);
+    }
+
+    @Transactional
+    public void deleteByMemberId(Long memberId){
+        refreshTokenRepository.deleteByMemberId(memberId);
+    }
 }

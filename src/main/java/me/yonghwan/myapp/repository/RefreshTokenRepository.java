@@ -12,5 +12,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     Optional<RefreshToken> findByMemberId(Long memberId);
 
-//    RefreshToken findByMemberId(Long memberId);
+    void deleteByMemberId(Long memberId);
+
+    void deleteAllByMemberId(Long memberId);
 }
