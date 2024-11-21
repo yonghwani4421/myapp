@@ -1,23 +1,34 @@
 package me.yonghwan.myapp.service;
 
 import jakarta.persistence.EntityManager;
+import me.yonghwan.myapp.aws.config.AwsS3Properties;
+import me.yonghwan.myapp.aws.service.S3Service;
 import me.yonghwan.myapp.domain.Board;
+import me.yonghwan.myapp.domain.BoardAttachment;
 import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.domain.Role;
 import me.yonghwan.myapp.dto.CustomMemberDetails;
 import me.yonghwan.myapp.dto.LoginMember;
+import me.yonghwan.myapp.helper.FileUtil;
 import me.yonghwan.myapp.repository.MemberRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,14 +41,23 @@ class BoardServiceTest {
     BoardService boardService;
     @Autowired
     MemberRepository memberRepository;
+
+    @Autowired
+    S3Service s3Service;
+    @Autowired
+    AwsS3Properties awsS3Properties;
+
+    @Autowired
+    FileUtil fileUtil;
+
+
     @Autowired
     EntityManager em;
     @Test
     @DisplayName("게시물 저장 테스트")
     public void save() throws Exception{
         // given
-        Board board = Board.builder().title("title1").content("content1").build();
-
+        Board board =  new Board("title1","content1");
 
         LoginMember member = new LoginMember();
         member.setEmail("test1@gmail.com");
@@ -57,4 +77,43 @@ class BoardServiceTest {
         // then
         assertThat(save).isEqualTo(board);
     }
+
+    @Test
+    @DisplayName("s3에 파일들을 업로드하고 DB에 저장한다.")
+    public void uploadFileAndSave() throws Exception{
+
+        String localFilePath = "C:\\workspace\\test.txt";
+
+        String bucketName = awsS3Properties.getBucketName();
+
+        File file = new File(localFilePath);
+        assertTrue(file.exists(), "파일이 존재해야 합니다.");
+
+
+        Board board = boardService.CreateBoardWithAttachmentSave(new Board("title1", "content1")
+                , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
+
+
+        assertNotNull(board.getBoardAttachments().get(0).getAttachmentUrl(), "업로드된 파일 URL이 null이어서는 안 됩니다.");
+        assertTrue(board.getBoardAttachments().get(0).getAttachmentUrl().startsWith("https://"), "업로드된 URL이 https://로 시작해야 합니다.");
+        assertTrue(board.getBoardAttachments().get(0).getAttachmentUrl().contains(awsS3Properties.getBucketName()), "URL에 버킷 이름이 포함되어야 합니다.");
+        assertEquals(board.getBoardAttachments().get(0).getAttachmentType(),"txt", "URL에 버킷 이름이 포함되어야 합니다.");
+        assertEquals(board.getBoardAttachments().size(),2, "갯수가 2개 이상이여야 합니다.");
+        assertEquals(board.getTitle(),"title1", "제목이 title1으로 정상적으로 들어가야합니다.");
+
+
+    }
+
+    public static MultipartFile convertToMultipartFile(File file) throws IOException {
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            return new MockMultipartFile(
+                    file.getName(),                // MultipartFile의 이름
+                    file.getName(),                // 원본 파일 이름
+                    "application/octet-stream",    // MIME 타입 (필요시 설정)
+                    inputStream                    // 파일 데이터
+            );
+        }
+    }
+
+
 }

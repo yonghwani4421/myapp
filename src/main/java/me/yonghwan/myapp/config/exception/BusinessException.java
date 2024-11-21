@@ -1,7 +1,5 @@
 package me.yonghwan.myapp.config.exception;
 
-import me.yonghwan.myapp.common.codes.ErrorCode;
-
 public class BusinessException extends RuntimeException {
 
     public BusinessException() {

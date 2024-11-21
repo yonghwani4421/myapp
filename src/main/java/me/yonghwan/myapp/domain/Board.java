@@ -2,9 +2,11 @@ package me.yonghwan.myapp.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -20,10 +22,28 @@ public class Board extends BaseEntity{
     private String content;
     private String status;
 
-    @Builder
+    /**
+     * BoardAttachment
+     * 1 : N 관계
+     */
+    @OneToMany(mappedBy = "board")
+    private List<BoardAttachment> boardAttachments = new ArrayList<>();
+
+
     public Board(String title, String content) {
         this.title = title;
         this.content = content;
-        this.status = status;
+
     }
+
+    /**
+     * 연관관계 편의 메서드: 첨부파일 추가
+     */
+    public void addAttachment(BoardAttachment attachment) {
+        this.boardAttachments.add(attachment);
+        attachment.addBoard(this);
+    }
+
+
+
 }
