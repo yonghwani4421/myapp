@@ -10,6 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Service
 public class SessionUtil {
@@ -32,13 +34,14 @@ public class SessionUtil {
 
 
 
-    public String getEmail() {
+    public Optional<String> getEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.getPrincipal() instanceof CustomMemberDetails)
             // 사용자를 가져온다.
-            return ((CustomMemberDetails) authentication.getPrincipal()).getUsername();
+            return Optional.ofNullable(((CustomMemberDetails) authentication.getPrincipal()).getUsername());
         else
-            throw new BusinessException("session load fail");
+            return Optional.empty();
     }
+
 }
