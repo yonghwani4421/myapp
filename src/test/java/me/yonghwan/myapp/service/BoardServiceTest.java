@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,8 +40,6 @@ class BoardServiceTest {
 
     @Autowired
     BoardService boardService;
-    @Autowired
-    MemberRepository memberRepository;
 
     @Autowired
     S3Service s3Service;
@@ -50,9 +49,12 @@ class BoardServiceTest {
     @Autowired
     FileUtil fileUtil;
 
-
     @Autowired
     EntityManager em;
+
+    private static final String PATH = "C:\\workspace\\test.txt";
+
+
     @Test
     @DisplayName("게시물 저장 테스트")
     public void save() throws Exception{
@@ -82,17 +84,11 @@ class BoardServiceTest {
     @DisplayName("s3에 파일들을 업로드하고 DB에 저장한다.")
     public void uploadFileAndSave() throws Exception{
 
-        String localFilePath = "C:\\workspace\\test.txt";
-
-        String bucketName = awsS3Properties.getBucketName();
-
-        File file = new File(localFilePath);
+        File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
-
 
         Board board = boardService.CreateBoardWithAttachmentSave(new Board("title1", "content1")
                 , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
-
 
         assertNotNull(board.getBoardAttachments().get(0).getAttachmentUrl(), "업로드된 파일 URL이 null이어서는 안 됩니다.");
         assertTrue(board.getBoardAttachments().get(0).getAttachmentUrl().startsWith("https://"), "업로드된 URL이 https://로 시작해야 합니다.");
@@ -100,8 +96,57 @@ class BoardServiceTest {
         assertEquals(board.getBoardAttachments().get(0).getAttachmentType(),"txt", "URL에 버킷 이름이 포함되어야 합니다.");
         assertEquals(board.getBoardAttachments().size(),2, "갯수가 2개 이상이여야 합니다.");
         assertEquals(board.getTitle(),"title1", "제목이 title1으로 정상적으로 들어가야합니다.");
+    }
 
 
+    @Test
+    @DisplayName("첨부파일 1개만 삭제한다.")
+    public void deleteFile() throws Exception{
+        File file = new File(PATH);
+        assertTrue(file.exists(), "파일이 존재해야 합니다.");
+        // 게시물 등록 첨부파일 s3에 저장
+        Board board = boardService.CreateBoardWithAttachmentSave(new Board("title1", "content1")
+                , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
+
+        BoardAttachment boardAttachment = board.getBoardAttachments().get(0);
+        s3Service.deleteFile(fileUtil.convertToFileName(boardAttachment.getAttachmentUrl()));
+
+        assertFalse(s3Service.isExistFile(fileUtil.convertToFileName(boardAttachment.getAttachmentUrl())),"파일삭제가 되어야합니다.");
+
+        boardService.deleteAttachment(boardAttachment.getId());
+
+        em.flush();
+        em.clear();
+
+        Board findBoard = boardService.findByIdWithAttachments(board.getId());
+
+        // then
+        assertEquals(findBoard.getBoardAttachments().size(),1,"DB에서 정상적으로 삭제가 되어야 합니다.");
+    }
+
+    @Test
+    @DisplayName("첨부파일 전부 삭제한다.")
+    public void deleteAllFile() throws Exception{
+        File file = new File(PATH);
+        assertTrue(file.exists(), "파일이 존재해야 합니다.");
+        // 게시물 등록 첨부파일 s3에 저장
+        Board board = boardService.CreateBoardWithAttachmentSave(new Board("title1", "content1")
+                , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
+
+        board.getBoardAttachments().stream().forEach(boardAttachment -> {
+            s3Service.deleteFile(fileUtil.convertToFileName(boardAttachment.getAttachmentUrl()));
+            assertFalse(s3Service.isExistFile(fileUtil.convertToFileName(boardAttachment.getAttachmentUrl())),"파일삭제가 되어야합니다.");
+        });
+        // 전체 삭제
+        board.getBoardAttachments().stream().forEach(boardAttachment -> boardService.deleteAttachment(boardAttachment.getId()));
+
+        em.flush();
+        em.clear();
+
+        Board findBoard = boardService.findByIdWithAttachments(board.getId());
+
+        // then
+        assertEquals(findBoard.getBoardAttachments().size(),0,"DB에서 정상적으로 삭제가 되어야 합니다.");
     }
 
     public static MultipartFile convertToMultipartFile(File file) throws IOException {

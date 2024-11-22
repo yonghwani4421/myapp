@@ -33,7 +33,6 @@ public class Board extends BaseEntity{
     public Board(String title, String content) {
         this.title = title;
         this.content = content;
-
     }
 
     /**
@@ -43,6 +42,8 @@ public class Board extends BaseEntity{
         this.boardAttachments.add(attachment);
         attachment.addBoard(this);
     }
+
+
 
 
 

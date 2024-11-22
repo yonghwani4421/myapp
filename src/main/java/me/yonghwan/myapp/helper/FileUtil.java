@@ -45,6 +45,9 @@ public class FileUtil {
         return fileName.substring(lastIndexOfDot + 1);
     }
 
+    public String convertToFileName(String imageUrl){
+        return imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+    }
 
 
 

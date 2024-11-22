@@ -68,9 +68,7 @@ public class S3Service {
         return mergedUrl.toString();
     }
 
-    public byte[] downloadFile(String image) {
-
-        String filename = image.substring(image.lastIndexOf('/') + 1);
+    public byte[] downloadFile(String filename) {
 
         S3Object s3Object = s3Client.getObject(awsS3Properties.getBucketName(), filename);
         S3ObjectInputStream inputStream = s3Object.getObjectContent();
@@ -86,6 +84,10 @@ public class S3Service {
     public String deleteFile(String fileName) {
         s3Client.deleteObject(awsS3Properties.getBucketName(), fileName);
         return fileName + " removed ...";
+    }
+
+    public boolean isExistFile(String filename){
+        return s3Client.doesObjectExist(awsS3Properties.getBucketName(), filename);
     }
 
 

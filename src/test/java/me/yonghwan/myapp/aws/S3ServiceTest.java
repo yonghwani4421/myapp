@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-//@Rollback(value = false)
 class S3ServiceTest {
 
     @Autowired
@@ -31,18 +31,15 @@ class S3ServiceTest {
     AwsS3Properties awsS3Properties;
 
     @Autowired
-    BoardService boardService;
+    FileUtil fileUtil;
+
+    private static final String PATH = "C:\\workspace\\test.txt";
 
     @Test
     @DisplayName("s3에 파일을 업로드 한다.")
     public void uploadFile() throws Exception{
         // given
-
-        String localFilePath = "C:\\workspace\\test.txt";
-
-        String bucketName = awsS3Properties.getBucketName();
-
-        File file = new File(localFilePath);
+        File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
 
         String uploadedFileUrl = s3Service.uploadFile(convertToMultipartFile(file));
@@ -57,12 +54,7 @@ class S3ServiceTest {
     @DisplayName("s3에 다중 파일을 업로드 한다.")
     public void uploadFiles() throws Exception{
         // given
-
-        String localFilePath = "C:\\workspace\\test.txt";
-
-        String bucketName = awsS3Properties.getBucketName();
-
-        File file = new File(localFilePath);
+        File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
 
         List<MultipartFile> list = Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file));
@@ -81,6 +73,47 @@ class S3ServiceTest {
 
 
     }
+
+
+    @Test
+    @DisplayName("s3에서 파일을 업로드한뒤 다운로드 한다.")
+    public void downloadToS3File() throws Exception{
+        // given
+        File file = new File(PATH);
+        assertTrue(file.exists(), "파일이 존재해야 합니다.");
+
+        String uploadedFileUrl = s3Service.uploadFile(convertToMultipartFile(file));
+
+        assertNotNull(uploadedFileUrl, "업로드된 파일 URL이 null이어서는 안 됩니다.");
+        assertTrue(uploadedFileUrl.startsWith("https://"), "업로드된 URL이 https://로 시작해야 합니다.");
+        assertTrue(uploadedFileUrl.contains(awsS3Properties.getBucketName()), "URL에 버킷 이름이 포함되어야 합니다.");
+
+        byte[] bytes = s3Service.downloadFile(fileUtil.convertToFileName(uploadedFileUrl));
+
+        String content = new String(bytes, StandardCharsets.UTF_8);
+
+        assertEquals(content,"test","파일 업로드 내용이 동일해야합니다.");
+
+    }
+
+    @Test
+    @DisplayName("s3에서 파일을 업로드한뒤 다시 삭제한다.")
+    public void deleteToS3File() throws Exception{
+        // given
+        File file = new File(PATH);
+        assertTrue(file.exists(), "파일이 존재해야 합니다.");
+        String uploadedFileUrl = s3Service.uploadFile(convertToMultipartFile(file));
+
+        assertNotNull(uploadedFileUrl, "업로드된 파일 URL이 null이어서는 안 됩니다.");
+        assertTrue(uploadedFileUrl.startsWith("https://"), "업로드된 URL이 https://로 시작해야 합니다.");
+        assertTrue(uploadedFileUrl.contains(awsS3Properties.getBucketName()), "URL에 버킷 이름이 포함되어야 합니다.");
+
+        String fileName = fileUtil.convertToFileName(uploadedFileUrl);
+        s3Service.deleteFile(fileName);
+        assertFalse(s3Service.isExistFile(fileName),"파일삭제가 되어야합니다.");
+
+    }
+
 
 
     public static MultipartFile convertToMultipartFile(File file) throws IOException {
