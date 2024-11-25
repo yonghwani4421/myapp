@@ -38,6 +38,8 @@ public class BoardAttachment extends BaseEntity{
     public void addBoard(Board board){
         this.board = board;
     }
-
+    public void deleteBoard(){
+        this.board = null;
+    }
 
 }

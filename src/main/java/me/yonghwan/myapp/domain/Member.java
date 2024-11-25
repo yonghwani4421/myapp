@@ -36,7 +36,7 @@ public class Member extends BaseTimeEntity{
     private List<Keyword> keyWords = new ArrayList<>();
 
     /**
-     * manner 양방향 관계
+     * Manner 양방향 관계
      */
     @OneToMany(mappedBy = "giver", cascade =CascadeType.ALL, orphanRemoval = true)
     private List<Manner> givers = new ArrayList<>();
@@ -44,14 +44,16 @@ public class Member extends BaseTimeEntity{
     @OneToMany(mappedBy = "receiver", cascade =CascadeType.ALL, orphanRemoval = true)
     private List<Manner> receiver = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", cascade =CascadeType.ALL, orphanRemoval = true)
+    private List<Board> boards  = new ArrayList<>();
+
 
     /**
      * 나의 매너 점수를 계산해주는 함수
      * @return
      */
     public long calculateMannerScore(){
-        if (!this.receiver.isEmpty()){
-            System.out.println("###################### this.receiver.size() = " + this.receiver.size());
+        if (this.receiver != null && !this.receiver.isEmpty()){
             return this.receiver.stream().mapToInt(Manner::getScore).sum() / this.receiver.size();
         } else {
             return 0L;

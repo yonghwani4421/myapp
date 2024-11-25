@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import me.yonghwan.myapp.config.exception.DeletionException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +23,23 @@ public class Board extends BaseEntity{
     private String content;
     private String status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     /**
      * BoardAttachment
      * 1 : N 관계
      */
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", cascade =CascadeType.ALL, orphanRemoval = true)
     private List<BoardAttachment> boardAttachments = new ArrayList<>();
 
+    /**
+     * BoardLikes
+     * 1 : N 관계
+     */
+    @OneToMany(mappedBy = "board", cascade =CascadeType.ALL, orphanRemoval = true)
+    private List<BoardLikes> boardLikes = new ArrayList<>();
 
     public Board(String title, String content) {
         this.title = title;
@@ -42,9 +53,5 @@ public class Board extends BaseEntity{
         this.boardAttachments.add(attachment);
         attachment.addBoard(this);
     }
-
-
-
-
 
 }
