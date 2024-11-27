@@ -11,8 +11,11 @@ import me.yonghwan.myapp.common.codes.SuccessCode;
 import me.yonghwan.myapp.common.response.CommonResponse;
 import me.yonghwan.myapp.domain.Board;
 import me.yonghwan.myapp.dto.*;
+import me.yonghwan.myapp.helper.SessionUtil;
 import me.yonghwan.myapp.service.BoardService;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +29,32 @@ import java.util.stream.Collectors;
 public class BoardApiController {
 
     private final BoardService boardService;
+    private final SessionUtil sessionUtil;
+
+    @Operation(summary = "게시물 리스트", description = "게시물 리스트 조회")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
+            @ApiResponse(responseCode = "400", description = "조회 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
+    })
+    @GetMapping
+    public CommonResponse<Page<BoardListResponse>> getList(
+            @RequestParam int pageNumber,
+            @RequestParam int pageSize) throws FileUploadException {
+
+        Page<Board> boardList = boardService.getBoardList(PageRequest.of(pageNumber, pageSize));
+        return CommonResponse.<Page<BoardListResponse>>builder()
+                .result(
+                        boardList.map(board ->
+                                new BoardListResponse(
+                                        board.getTitle(),
+                                        board.getContent(),
+                                        board.getCreateDate()))
+                )
+                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .build();
+    }
+
     @Operation(summary = "게시물 등록", description = "게시물을 등록합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "등록 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
@@ -80,8 +109,18 @@ public class BoardApiController {
                 .build();
     }
 
-
-
-
+    @Operation(summary = "게시물 좋아요", description = "게시물 좋아요 / 좋아요 취소")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "삭제 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
+            @ApiResponse(responseCode = "400", description = "삭제 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
+    })
+    @PostMapping("/{id}/likes")
+    public CommonResponse<Void> boardLike(@PathVariable("id") Long id) {
+        boardService.addLikes(id, sessionUtil.getMemberSesson());
+        return CommonResponse.<Void>builder()
+                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .build();
+    }
 
 }

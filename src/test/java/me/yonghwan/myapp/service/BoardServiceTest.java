@@ -138,7 +138,6 @@ class BoardServiceTest {
         Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1")
                 , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
 
-
         Long id = board.getBoardAttachments().get(0).getId();
         boardService.updateBoard(new BoardRequest("title2","content2",Arrays.asList(id))
                 ,Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)),board.getId());
@@ -148,10 +147,8 @@ class BoardServiceTest {
 
         Board findBoard = boardService.findById(board.getId());
 
-
         assertEquals(findBoard.getTitle(),"title2", "제목이 title2으로 정상적으로 들어가야합니다.");
         assertEquals(findBoard.getBoardAttachments().size(),3,"파일의 갯수가 맞아야합니다.");
-
     }
     @Test
     @DisplayName("게시물을 삭제한다.")
@@ -297,39 +294,14 @@ class BoardServiceTest {
         Board saveBoard = boardService.saveBoardWithAttachments(board
                 , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
 
-        boardService.addLikes(saveBoard.getId(), m1.getId());
+        boardService.addLikes(saveBoard.getId(),m1);
 
-        List<BoardLikes> all = boardLikesRepository.findAll();
-
-        assertTrue(boardService.addLikes(saveBoard.getId(), m1.getId()),"추가가 정상적으로 되어야합니다.");
         assertEquals(boardLikesRepository.findAll().size(),1,"숫자가 정상적으로 1개여야합니다.");
-        assertTrue(boardService.cancelLikes(saveBoard.getId(), m1.getId()),"삭제가 정상적으로 되어야합니다.");
-        assertEquals(all.size(),0,"숫자가 정상적으로 0개여야합니다.");
 
-        // then
-    }
+        boardService.addLikes(saveBoard.getId(),m1);
 
+        assertEquals(boardLikesRepository.findAll().size(),0,"숫자가 정상적으로 0개여야합니다.");
 
-
-    @Test
-    @DisplayName("게시물에 좋아요 삭제")
-    public void boardLikeCancel() throws Exception{
-        // given
-        Board board =  new Board("title1","content1");
-
-        File file = new File(PATH);
-        assertTrue(file.exists(), "파일이 존재해야 합니다.");
-        Board saveBoard = boardService.saveBoardWithAttachments(board
-                , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
-
-
-        boardService.addLikes(saveBoard.getId(), m1.getId());
-
-        boolean b1 = boardService.cancelLikes(saveBoard.getId(), m1.getId());
-
-        assertTrue(b1,"삭제가 정상적으로 되어야합니다.");
-        List<BoardLikes> all = boardLikesRepository.findAll();
-        assertEquals(all.size(),0,"숫자가 정상적으로 0개여야합니다.");
         // then
     }
 

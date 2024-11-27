@@ -6,9 +6,7 @@ import me.yonghwan.myapp.domain.Board;
 import me.yonghwan.myapp.domain.BoardAttachment;
 import me.yonghwan.myapp.domain.BoardLikes;
 import me.yonghwan.myapp.domain.Member;
-import me.yonghwan.myapp.dto.BoardAttachmentResponse;
 import me.yonghwan.myapp.dto.BoardRequest;
-import me.yonghwan.myapp.dto.BoardResponse;
 import me.yonghwan.myapp.helper.FileUtil;
 import me.yonghwan.myapp.repository.BoardAttachmentRepository;
 import me.yonghwan.myapp.repository.BoardLikesRepository;
@@ -22,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,12 +45,11 @@ public class BoardService {
      */
     @Transactional
     public Board saveBoardWithAttachments(Board board, List<MultipartFile> files) throws FileUploadException {
-        if (saveAttachments(board, files)){
-            return boardRepository.save(board);
-        } else {
-            throw new FileUploadException("첨부파일 저장 실패");
-        }
 
+        if (files != null && !files.isEmpty()) {
+            saveAttachments(board, files);
+        }
+        return boardRepository.save(board);
     }
 
     /**
@@ -61,24 +57,19 @@ public class BoardService {
      * @param board
      * @param files
      */
-    public boolean saveAttachments(Board board, List<MultipartFile> files) {
-        if (files != null && !files.isEmpty()) {
-            String[] uploadedFileUrls = s3Service.uploadFiles(files).split(",");
-            List<Long> fileSize = files.stream().map(MultipartFile::getSize).collect(Collectors.toList());
-            for (int i = 0; i < uploadedFileUrls.length; i++) {
-                board.addAttachment(
-                        new BoardAttachment(
-                                fileUtil.getFileNameWithoutExtension(uploadedFileUrls[i]) // file name
-                                , fileUtil.getFileExtension(uploadedFileUrls[i]) // file type
-                                , fileSize.get(i) // file size
-                                , uploadedFileUrls[i]) // file url
+    public void saveAttachments(Board board, List<MultipartFile> files) {
+        String[] uploadedFileUrls = s3Service.uploadFiles(files).split(",");
+        List<Long> fileSize = files.stream().map(MultipartFile::getSize).collect(Collectors.toList());
+        for (int i = 0; i < uploadedFileUrls.length; i++) {
+             board.addAttachment(
+                     new BoardAttachment(
+                             fileUtil.getFileNameWithoutExtension(uploadedFileUrls[i]) // file name
+                             , fileUtil.getFileExtension(uploadedFileUrls[i]) // file type
+                             , fileSize.get(i) // file size
+                             , uploadedFileUrls[i]) // file url
 
-                );
-            }
-            return true;
-        } else {
-            return false;
-        }
+             );
+         }
     }
 
 
@@ -198,16 +189,14 @@ public class BoardService {
      * @return
      */
 
-    public boolean addLikes(Long boardId, Long memberId){
+    public void addLikes(Long boardId,Member member){
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new IllegalArgumentException("not found : "+ boardId));
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("not found : " + memberId));
 
         if (isNotAlreadyLike(member,board)){
             boardLikesRepository.save(new BoardLikes(board, member));
-            return true;
+        } else {
+            boardLikesRepository.deleteByMemberAndBoard(member, board);
         }
-
-        return false;
     }
 
     /**

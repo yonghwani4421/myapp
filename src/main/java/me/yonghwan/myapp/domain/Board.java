@@ -45,6 +45,7 @@ public class Board extends BaseEntity{
     public Board(String title, String content) {
         this.title = title;
         this.content = content;
+        this.status = "Y";
     }
 
     /**

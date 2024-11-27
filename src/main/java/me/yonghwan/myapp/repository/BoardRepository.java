@@ -21,7 +21,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             " where b.id = :boardId")
     Optional<Board> findByIdWithAttachments(@Param("boardId") Long boardId);
 
+    @Query("select b from Board b where b.status = 'Y'")
     Page<Board> findAll(Pageable pageable);
-
 
 }
