@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.yonghwan.myapp.config.exception.DeletionException;
+import me.yonghwan.myapp.dto.BoardRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,4 +55,9 @@ public class Board extends BaseEntity{
         attachment.addBoard(this);
     }
 
+
+    public void update(BoardRequest request){
+        this.title = request.getTitle();
+        this.content = request.getContent();
+    }
 }

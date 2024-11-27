@@ -1,6 +1,7 @@
 package me.yonghwan.myapp.aws.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
@@ -24,7 +25,7 @@ public class S3Service {
     private final AwsS3Properties awsS3Properties;
     private final FileUtil fileUtil;
 
-    public String uploadFile(MultipartFile file) throws IOException {
+    public String uploadFile(MultipartFile file){
         // 업로드 널값 체크 로직 추가
         if (file.isEmpty() || file == null)
             throw new NullPointerException("파일값이 null 입니다.");
@@ -33,14 +34,20 @@ public class S3Service {
 
         log.info("## uploadFile fileName: {}", fileName);
         // S3에 파일 업로드
-        s3Client.putObject(
-                new PutObjectRequest(
-                        awsS3Properties.getBucketName()
-                        , fileName
-                        , fileUtil.convertMultiPartFileToFile(file)
-                        )
+        try{
+            s3Client.putObject(
+                    new PutObjectRequest(
+                            awsS3Properties.getBucketName()
+                            , fileName
+                            , fileUtil.convertMultiPartFileToFile(file)
+                    )
 
-        );
+            );
+        } catch (AmazonS3Exception e){
+           log.error("## S3 Exception : {}", e.getMessage());
+            throw e;
+        }
+
 
         // 업로드한 파일 URL 반환
         return s3Client.getUrl(awsS3Properties.getBucketName(), fileName).toString();
@@ -55,11 +62,7 @@ public class S3Service {
         StringBuilder mergedUrl = new StringBuilder();
 
         for (int i = 0; i < files.size(); i++) {
-            try {
-                mergedUrl.append(uploadFile(files.get(i)));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            mergedUrl.append(uploadFile(files.get(i)));
             if(i < files.size() - 1) {
                 mergedUrl.append(",");
             }
