@@ -5,6 +5,7 @@ import me.yonghwan.myapp.domain.Manner;
 import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.domain.Role;
 import me.yonghwan.myapp.repository.MemberRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,38 +34,38 @@ class MannerServiceTest {
     @Autowired
     EntityManager em;
 
+    Member m1;
+    Member m2;
+    Member m3;
 
+    @BeforeEach
+    public void before(){
+        memberRepository.deleteAll(); // 기존 데이터 초기화
+        m1 = createMember("test1@gmail.com", "곱창국수1");
+        m2 = createMember("test2@gmail.com", "곱창국수2");
+        m3 = createMember("test3@gmail.com", "곱창국수3");
+    }
+    private Member createMember(String email, String nickName) {
+        return memberRepository.save(
+                Member.builder()
+                        .email(email)
+                        .password(bCryptPasswordEncoder.encode("123"))
+                        .name("testName")
+                        .phoneNum("01080754421")
+                        .nickName(nickName)
+                        .address("청송로")
+                        .addressDetail("310동206호")
+                        .zipCode("10101010")
+                        .role(Role.ADMIN).build()
+        );
+    }
 
 
     @Test
     @DisplayName("save : 별점을 준 사람 받은사람 확인 / not null 체크 / 정확한 점수인지")
     public void save() throws Exception{
         // given
-        Member m1 = memberRepository.save(
-                Member.builder()
-                        .email("test1@gmail.com")
-                        .password(bCryptPasswordEncoder.encode("123"))
-                        .name("kim1")
-                        .phoneNum("01080754421")
-                        .nickName("곱창국수1")
-                        .address("청송로")
-                        .addressDetail("310동206호")
-                        .zipCode("10101010")
-                        .role(Role.ADMIN).build()
-        );
 
-        Member m2 = memberRepository.save(
-                Member.builder()
-                        .email("test2@gmail.com")
-                        .password(bCryptPasswordEncoder.encode("123"))
-                        .name("kim2")
-                        .phoneNum("01080754421")
-                        .nickName("곱창국수2")
-                        .address("청송로")
-                        .addressDetail("310동206호")
-                        .zipCode("10101010")
-                        .role(Role.ADMIN).build()
-        );
 
 
         // when
@@ -89,43 +90,7 @@ class MannerServiceTest {
     @DisplayName("list : 내가 받은 매너리스트 갯수 / 매너점수 평균")
     public void totalMannerList() throws Exception{
         // given
-        Member m1 = memberRepository.save(
-                Member.builder()
-                        .email("test1@gmail.com")
-                        .password(bCryptPasswordEncoder.encode("123"))
-                        .name("kim1")
-                        .phoneNum("01080754421")
-                        .nickName("곱창국수1")
-                        .address("청송로")
-                        .addressDetail("310동206호")
-                        .zipCode("10101010")
-                        .role(Role.ADMIN).build()
-        );
 
-        Member m2 = memberRepository.save(
-                Member.builder()
-                        .email("test2@gmail.com")
-                        .password(bCryptPasswordEncoder.encode("123"))
-                        .name("kim2")
-                        .phoneNum("01080754421")
-                        .nickName("곱창국수2")
-                        .address("청송로")
-                        .addressDetail("310동206호")
-                        .zipCode("10101010")
-                        .role(Role.ADMIN).build()
-        );
-        Member m3 = memberRepository.save(
-                Member.builder()
-                        .email("test3@gmail.com")
-                        .password(bCryptPasswordEncoder.encode("123"))
-                        .name("kim3")
-                        .phoneNum("01080754421")
-                        .nickName("곱창국수3")
-                        .address("청송로")
-                        .addressDetail("310동206호")
-                        .zipCode("10101010")
-                        .role(Role.ADMIN).build()
-        );
         // when
         mannerService.save(
                 Manner.builder()

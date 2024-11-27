@@ -6,13 +6,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.yonghwan.myapp.common.codes.SuccessCode;
 import me.yonghwan.myapp.common.response.CommonResponse;
 import me.yonghwan.myapp.domain.Board;
-import me.yonghwan.myapp.domain.BoardAttachment;
-import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.dto.*;
 import me.yonghwan.myapp.service.BoardService;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +31,7 @@ public class BoardApiController {
             @ApiResponse(responseCode = "400", description = "등록 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
     })
     @PostMapping
-    public CommonResponse<BoardResponse> boardSave(@RequestPart(value = "dto") BoardRequest request
+    public CommonResponse<BoardResponse> boardSave(@RequestPart(value = "board") BoardRequest request
     , @RequestPart(value = "file", required = false)List<MultipartFile> files) {
         Board board = boardService.CreateBoardWithAttachmentSave(request.toEntity(), files);
         return CommonResponse.<BoardResponse>builder()

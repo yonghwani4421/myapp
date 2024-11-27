@@ -10,10 +10,14 @@ import me.yonghwan.myapp.helper.FileUtil;
 import me.yonghwan.myapp.repository.BoardLikesRepository;
 import me.yonghwan.myapp.repository.MemberRepository;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -58,17 +62,16 @@ class BoardServiceTest {
 
     private static final String PATH = "C:\\workspace\\test.txt";
 
+    Member m1;
 
-    @Test
-    @DisplayName("게시물 등록 테스트")
-    public void save() throws Exception{
-        // given
-        Board board =  new Board("title1","content1");
-
+    @BeforeEach
+    public void before(){
+        memberRepository.deleteAll(); // 기존 데이터 초기화
+        m1 = createMember("test1@gmail.com", "곱창국수1");
         LoginMember member = new LoginMember();
-        member.setEmail("test1@gmail.com");
+        member.setEmail(m1.getEmail());
         member.setPassword("temppassword");
-        member.setRole(Role.valueOf("ADMIN"));
+        member.setRole(m1.getRole());
 
         CustomMemberDetails customMemberDetails = new CustomMemberDetails(member);
 
@@ -76,6 +79,28 @@ class BoardServiceTest {
         Authentication authToken = new UsernamePasswordAuthenticationToken(customMemberDetails, null, customMemberDetails.getAuthorities());
         //세션에 사용자 등록
         SecurityContextHolder.getContext().setAuthentication(authToken);
+    }
+
+    private Member createMember(String email, String nickName) {
+        return memberRepository.save(
+                Member.builder()
+                        .email(email)
+                        .password("123")
+                        .name("testName")
+                        .phoneNum("01080754421")
+                        .nickName(nickName)
+                        .address("청송로")
+                        .addressDetail("310동206호")
+                        .zipCode("10101010")
+                        .role(Role.ADMIN).build()
+        );
+    }
+
+    @Test
+    @DisplayName("게시물 등록 테스트")
+    public void save() throws Exception{
+        // given
+        Board board =  new Board("title1","content1");
 
         // when
         Board save = boardService.save(board);
@@ -160,18 +185,6 @@ class BoardServiceTest {
         // given
         Board board =  new Board("title1","content1");
 
-        LoginMember member = new LoginMember();
-        member.setEmail("test1@gmail.com");
-        member.setPassword("temppassword");
-        member.setRole(Role.valueOf("ADMIN"));
-
-        CustomMemberDetails customMemberDetails = new CustomMemberDetails(member);
-
-        // 스프링 시큐리티 인증 토큰 생성
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customMemberDetails, null, customMemberDetails.getAuthorities());
-        //세션에 사용자 등록
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
         Board saveBoard = boardService.CreateBoardWithAttachmentSave(board
@@ -195,18 +208,6 @@ class BoardServiceTest {
     public void boardSaveWithAttachmentAndDeleteAll() throws Exception{
         // given
         Board board =  new Board("title1","content1");
-
-        LoginMember member = new LoginMember();
-        member.setEmail("test1@gmail.com");
-        member.setPassword("temppassword");
-        member.setRole(Role.valueOf("ADMIN"));
-
-        CustomMemberDetails customMemberDetails = new CustomMemberDetails(member);
-
-        // 스프링 시큐리티 인증 토큰 생성
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customMemberDetails, null, customMemberDetails.getAuthorities());
-        //세션에 사용자 등록
-        SecurityContextHolder.getContext().setAuthentication(authToken);
 
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
@@ -238,19 +239,18 @@ class BoardServiceTest {
         // given
         Board board =  new Board("title1","content1");
 
-        Member m1 = createMember();
-
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
         Board saveBoard = boardService.CreateBoardWithAttachmentSave(board
                 , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
 
 
+        List<BoardLikes> all = boardLikesRepository.findAll();
 
         assertTrue(boardService.addLikes(saveBoard.getId(), m1.getId()),"추가가 정상적으로 되어야합니다.");
         assertEquals(boardLikesRepository.findAll().size(),1,"숫자가 정상적으로 1개여야합니다.");
         assertTrue(boardService.cancelLikes(saveBoard.getId(), m1.getId()),"삭제가 정상적으로 되어야합니다.");
-        assertEquals(boardLikesRepository.findAll().size(),0,"숫자가 정상적으로 0개여야합니다.");
+        assertEquals(all.size(),0,"숫자가 정상적으로 0개여야합니다.");
 
         // then
     }
@@ -262,8 +262,6 @@ class BoardServiceTest {
     public void boardLikeCancel() throws Exception{
         // given
         Board board =  new Board("title1","content1");
-
-        Member m1 = createMember();
 
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
@@ -282,54 +280,15 @@ class BoardServiceTest {
     }
 
     @Test
-    @DisplayName("게시물 리스트 페이징해서 조회하기")
+    @DisplayName("게시물 리스트 페이징 처리 조회")
     public void getPageList() throws Exception{
         // given
-        Member m1 = createMember();
-
         for (int i = 0; i < 20; i++) {
             boardService.CreateBoardWithAttachmentSave(new Board("title"+i,"content"+i),null);
         }
-        // when
-
-
-
-
         // then
+        assertEquals(boardService.getBoardList(PageRequest.of(0,10)).getSize(),10);
     }
-
-
-    private Member createMember() {
-        Member m1 = memberRepository.save(
-                Member.builder()
-                        .email("test1@gmail.com")
-                        .password("123")
-                        .name("kim1")
-                        .phoneNum("01080754421")
-                        .nickName("곱창국수1")
-                        .address("청송로")
-                        .addressDetail("310동206호")
-                        .zipCode("10101010")
-                        .role(Role.ADMIN).build()
-        );
-
-        LoginMember member = new LoginMember();
-        member.setEmail(m1.getEmail());
-        member.setPassword("temppassword");
-        member.setRole(m1.getRole());
-
-        CustomMemberDetails customMemberDetails = new CustomMemberDetails(member);
-
-        // 스프링 시큐리티 인증 토큰 생성
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customMemberDetails, null, customMemberDetails.getAuthorities());
-        //세션에 사용자 등록
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-        return m1;
-    }
-
-
-
-
 
 
     public static MultipartFile convertToMultipartFile(File file) throws IOException {

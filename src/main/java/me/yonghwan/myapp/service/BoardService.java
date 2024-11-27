@@ -11,6 +11,8 @@ import me.yonghwan.myapp.repository.BoardAttachmentRepository;
 import me.yonghwan.myapp.repository.BoardLikesRepository;
 import me.yonghwan.myapp.repository.BoardRepository;
 import me.yonghwan.myapp.repository.MemberRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,7 +49,6 @@ public class BoardService {
                 long size = fileSize.get(i);  // fileSizes 리스트에서 해당 파일의 크기 추출
 
                 BoardAttachment boardAttachment = new BoardAttachment(fileName, type, size, uploadedFileUrl);
-                boardAttachmentRepository.save(boardAttachment);
                 board.addAttachment(boardAttachment);
             }
         }
@@ -95,6 +96,13 @@ public class BoardService {
 
     private boolean isNotAlreadyLike(Member member, Board board) {
         return boardLikesRepository.findByMemberAndBoard(member,board).isEmpty();
+    }
+
+    /**\
+     * 게시판 페이징된 리스트 조회
+     */
+    public Page<Board> getBoardList(Pageable pageable){
+         return boardRepository.findAll(pageable);
     }
 
 
