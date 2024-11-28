@@ -42,10 +42,11 @@ public class Board extends BaseEntity{
     @OneToMany(mappedBy = "board", cascade =CascadeType.ALL, orphanRemoval = true)
     private List<BoardLikes> boardLikes = new ArrayList<>();
 
-    public Board(String title, String content) {
+    public Board(String title, String content, Member member) {
         this.title = title;
         this.content = content;
         this.status = "Y";
+        this.member = member;
     }
 
     /**
@@ -60,5 +61,12 @@ public class Board extends BaseEntity{
     public void update(BoardRequest request){
         this.title = request.getTitle();
         this.content = request.getContent();
+    }
+
+    public void changeStatus(){
+        if ("Y".equals(this.status))
+            this.status = "N";
+        else
+            this.status = "Y";
     }
 }

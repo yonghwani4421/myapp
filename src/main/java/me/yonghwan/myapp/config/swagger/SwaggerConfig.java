@@ -1,5 +1,6 @@
 package me.yonghwan.myapp.config.swagger;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -22,8 +23,10 @@ public class SwaggerConfig {
                 .in(SecurityScheme.In.HEADER)
                 .description(
                         "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""));
+
         return new OpenAPI()
-                .components(new Components())
+                .components(new Components()
+                )
                 .info(apiInfo())
                 .addSecurityItem(securityRequirement)
                 .components(components);
@@ -34,4 +37,9 @@ public class SwaggerConfig {
                 .description("Let's practice Swagger UI") // API에 대한 설명
                 .version("1.0.0"); // API의 버전
     }
+
+
+
+
+
 }

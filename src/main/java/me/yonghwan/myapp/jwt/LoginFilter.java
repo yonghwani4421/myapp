@@ -89,7 +89,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
         log.info("## role : {}" , role);
 
-        String accessToken = jwtUtil.createJwt(email, role, Duration.ofMinutes(3).toMillis());
+        String accessToken = jwtUtil.createJwt(email, role, Duration.ofMinutes(30).toMillis());
 
 
         Member findMember = memberRepository.findByEmail(email).orElseThrow(()-> new IllegalArgumentException("not found : " + email ));

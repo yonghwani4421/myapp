@@ -1,6 +1,7 @@
 package me.yonghwan.myapp.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +17,7 @@ import me.yonghwan.myapp.service.BoardService;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,37 +40,70 @@ public class BoardApiController {
     })
     @GetMapping
     public CommonResponse<Page<BoardListResponse>> getList(
-            @RequestParam int pageNumber,
-            @RequestParam int pageSize) throws FileUploadException {
+            @Parameter(description = "페이지 번호 (0부터 시작)")
+            @RequestParam(name = "pageNumber") int pageNumber,
+
+            @Parameter(description = "페이지 크기")
+            @RequestParam(name = "pageSize") int pageSize){
 
         Page<Board> boardList = boardService.getBoardList(PageRequest.of(pageNumber, pageSize));
         return CommonResponse.<Page<BoardListResponse>>builder()
                 .result(
                         boardList.map(board ->
                                 new BoardListResponse(
+                                        board.getId(),
                                         board.getTitle(),
                                         board.getContent(),
                                         board.getCreateDate()))
                 )
-                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
-                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
                 .build();
     }
+
+
+//    @Operation(summary = "게시물 디테일", description = "게시물 조회")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
+//            @ApiResponse(responseCode = "400", description = "조회 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
+//    })
+//    @GetMapping
+//    public CommonResponse<BoardResponse> getBoard(
+//                        @Parameter(description = "게시물 id")
+//                        @PathVariable("id") Long id){
+//        Board board = boardService.findById(id);
+//
+//
+//        return CommonResponse.<BoardResponse>builder()
+//                .result(
+//
+//                )
+//                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+//                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+//                .build();
+//    }
 
     @Operation(summary = "게시물 등록", description = "게시물을 등록합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "등록 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
             @ApiResponse(responseCode = "400", description = "등록 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CommonResponse<BoardResponse> boardSave(
-            @RequestPart(value = "board") BoardRequest request
-            , @RequestPart(value = "file", required = false)List<MultipartFile> files) throws FileUploadException {
-        Board board = boardService.saveBoardWithAttachments(request.toEntity(), files);
+            @Parameter(description = "게시물 요청 데이터")
+            @RequestPart(value = "board") BoardSaveRequest request,
+
+            @Parameter(description = "첨부 파일 리스트", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
+            @RequestPart(value = "file", required = false) List<MultipartFile> files) {
+
+
+
+        Board board = boardService.saveBoardWithAttachments(request.toEntity(sessionUtil.getMemberSesson()), files);
+
         return CommonResponse.<BoardResponse>builder()
                 .result(
-                        new BoardResponse(board.getTitle(),board.getContent()
-                                ,board.getBoardAttachments().stream().map(BoardAttachmentResponse::new).collect(Collectors.toList()))
+                        new BoardResponse(board.getId(), board.getTitle(), board.getContent(),
+                                board.getBoardAttachments().stream().map(BoardAttachmentResponse::new).collect(Collectors.toList()))
                 )
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
@@ -82,13 +117,18 @@ public class BoardApiController {
     })
     @PutMapping("/{id}")
     public CommonResponse<BoardResponse> boardUpdate(
-            @PathVariable("id") Long id
-            , @RequestPart(value = "board") BoardRequest request
-            , @RequestPart(value = "file", required = false)List<MultipartFile> files) {
+            @Parameter(description = "게시물 id")
+            @PathVariable("id") Long id,
+
+            @Parameter(description = "게시물 요청 데이터")
+            @RequestPart(value = "board") BoardRequest request,
+
+            @Parameter(description = "추가될 파일")
+            @RequestPart(value = "file", required = false)List<MultipartFile> files) {
         Board board = boardService.updateBoard(request, files, id);
         return CommonResponse.<BoardResponse>builder()
                 .result(
-                        new BoardResponse(board.getTitle(),board.getContent()
+                        new BoardResponse(board.getId(), board.getTitle(),board.getContent()
                                 ,board.getBoardAttachments().stream().map(BoardAttachmentResponse::new).collect(Collectors.toList()))
                 )
                 .resultCode(SuccessCode.UPDATE_SUCCESS.getStatus())
@@ -101,7 +141,9 @@ public class BoardApiController {
             @ApiResponse(responseCode = "400", description = "삭제 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
     })
     @DeleteMapping("/{id}")
-    public CommonResponse<Void> boardDelete(@PathVariable("id") Long id) {
+    public CommonResponse<Void> boardDelete(
+            @Parameter(description = "게시물 id")
+            @PathVariable("id") Long id) {
         boardService.deleteBoardById(id);
         return CommonResponse.<Void>builder()
                 .resultCode(SuccessCode.DELETE_SUCCESS.getStatus())
@@ -109,14 +151,38 @@ public class BoardApiController {
                 .build();
     }
 
+    @Operation(summary = "게시물 상태 변경 삭제", description = "게시물을 삭제합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "삭제 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
+            @ApiResponse(responseCode = "400", description = "삭제 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
+    })
+    @PutMapping("/{id}/status")
+    public CommonResponse<Void> boardStatusChange(
+            @Parameter(description = "게시물 id")
+            @PathVariable("id") Long id) {
+        boardService.changeStatus(id);
+        return CommonResponse.<Void>builder()
+                .resultCode(SuccessCode.DELETE_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.DELETE_SUCCESS.getMessage())
+                .build();
+    }
+
+
+
+
+
+
+
     @Operation(summary = "게시물 좋아요", description = "게시물 좋아요 / 좋아요 취소")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "삭제 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
             @ApiResponse(responseCode = "400", description = "삭제 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
     })
     @PostMapping("/{id}/likes")
-    public CommonResponse<Void> boardLike(@PathVariable("id") Long id) {
-        boardService.addLikes(id, sessionUtil.getMemberSesson());
+    public CommonResponse<Void> boardLike(
+            @Parameter(description = "게시물 id")
+            @PathVariable("id") Long id) {
+        boardService.addOrCancelLikes(id, sessionUtil.getMemberSesson());
         return CommonResponse.<Void>builder()
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())

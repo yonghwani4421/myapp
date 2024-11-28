@@ -100,7 +100,7 @@ class BoardServiceTest {
     @DisplayName("게시물 등록 테스트")
     public void save() throws Exception{
         // given
-        Board board =  new Board("title1","content1");
+        Board board =  new Board("title1","content1",m1);
 
         // when
         Board save = boardService.save(board);
@@ -116,7 +116,7 @@ class BoardServiceTest {
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
 
-        Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1")
+        Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1",m1)
                 , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
 
         assertNotNull(board.getBoardAttachments().get(0).getAttachmentUrl(), "업로드된 파일 URL이 null이어서는 안 됩니다.");
@@ -135,7 +135,7 @@ class BoardServiceTest {
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
 
-        Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1")
+        Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1",m1)
                 , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
 
         Long id = board.getBoardAttachments().get(0).getId();
@@ -158,7 +158,7 @@ class BoardServiceTest {
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
 
-        Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1")
+        Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1",m1)
                 , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
 
 
@@ -184,7 +184,7 @@ class BoardServiceTest {
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
         // 게시물 등록 첨부파일 s3에 저장
-        Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1")
+        Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1",m1)
                 , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
 
         BoardAttachment boardAttachment = board.getBoardAttachments().get(0);
@@ -209,7 +209,7 @@ class BoardServiceTest {
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
         // 게시물 등록 첨부파일 s3에 저장
-        Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1")
+        Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1",m1)
                 , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
 
         board.getBoardAttachments().stream().forEach(boardAttachment -> {
@@ -233,7 +233,7 @@ class BoardServiceTest {
     @DisplayName("게시물 등록 ( 게시물 + 첨부파일 )")
     public void boardSaveWithAttachment() throws Exception{
         // given
-        Board board =  new Board("title1","content1");
+        Board board =  new Board("title1","content1",m1);
 
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
@@ -257,7 +257,7 @@ class BoardServiceTest {
     @DisplayName("게시물 등록 ( 게시물 + 첨부파일 ) 삭제")
     public void boardSaveWithAttachmentAndDeleteAll() throws Exception{
         // given
-        Board board =  new Board("title1","content1");
+        Board board =  new Board("title1","content1",m1);
 
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
@@ -287,18 +287,18 @@ class BoardServiceTest {
     @DisplayName("게시물에 좋아요 추가 / 좋아요 삭제")
     public void boardAddLike() throws Exception{
         // given
-        Board board =  new Board("title1","content1");
+        Board board =  new Board("title1","content1",m1);
 
         File file = new File(PATH);
         assertTrue(file.exists(), "파일이 존재해야 합니다.");
         Board saveBoard = boardService.saveBoardWithAttachments(board
                 , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
 
-        boardService.addLikes(saveBoard.getId(),m1);
+        boardService.addOrCancelLikes(saveBoard.getId(),m1);
 
         assertEquals(boardLikesRepository.findAll().size(),1,"숫자가 정상적으로 1개여야합니다.");
 
-        boardService.addLikes(saveBoard.getId(),m1);
+        boardService.addOrCancelLikes(saveBoard.getId(),m1);
 
         assertEquals(boardLikesRepository.findAll().size(),0,"숫자가 정상적으로 0개여야합니다.");
 
@@ -310,7 +310,7 @@ class BoardServiceTest {
     public void getPageList() throws Exception{
         // given
         for (int i = 0; i < 20; i++) {
-            boardService.saveBoardWithAttachments(new Board("title"+i,"content"+i),null);
+            boardService.saveBoardWithAttachments(new Board("title"+i,"content"+i,m1),null);
         }
         // then
         assertEquals(boardService.getBoardList(PageRequest.of(0,10)).getSize(),10);

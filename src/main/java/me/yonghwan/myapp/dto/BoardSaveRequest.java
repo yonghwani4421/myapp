@@ -11,16 +11,10 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BoardRequest {
+public class BoardSaveRequest {
 
     private String title;
     private String content;
-    private List<Long> deleteFileIds;
-
-    public BoardRequest(String title, String content) {
-        this.title = title;
-        this.content = content;
-    }
 
     public Board toEntity(Member member){
         return new Board(title,content,member);

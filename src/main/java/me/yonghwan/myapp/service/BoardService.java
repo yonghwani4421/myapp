@@ -12,7 +12,6 @@ import me.yonghwan.myapp.repository.BoardAttachmentRepository;
 import me.yonghwan.myapp.repository.BoardLikesRepository;
 import me.yonghwan.myapp.repository.BoardRepository;
 import me.yonghwan.myapp.repository.MemberRepository;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -44,8 +43,7 @@ public class BoardService {
      * @return
      */
     @Transactional
-    public Board saveBoardWithAttachments(Board board, List<MultipartFile> files) throws FileUploadException {
-
+    public Board saveBoardWithAttachments(Board board, List<MultipartFile> files) {
         if (files != null && !files.isEmpty()) {
             saveAttachments(board, files);
         }
@@ -103,6 +101,12 @@ public class BoardService {
         return board;
     }
 
+
+    @Transactional
+    public void changeStatus(Long id){
+        findById(id).changeStatus();
+    }
+
     private void deleteS3Files(List<BoardAttachment> boardAttachments, List<Long> deleteFileIds) {
         for (BoardAttachment boardAttachment : boardAttachments) {
             if(deleteFileIds.contains(boardAttachment.getId())){
@@ -112,21 +116,23 @@ public class BoardService {
         }
     }
 
+    @Transactional
     public void deleteBoardById(Long id){
         Board board = findByIdWithAttachments(id);
-
-        /**
-         * Board 제거 CASCADE 설정으로 BoardAttachment 전부 같이 삭제
-         */
-        boardRepository.deleteById(id);
         /**
          * 제거될 파일 제거 S3에서도 제거
          */
         deleteS3Files(
                 board.getBoardAttachments()
                 , board.getBoardAttachments()
-                    .stream().map(BoardAttachment::getId)
-                    .collect(Collectors.toList()));
+                        .stream().map(BoardAttachment::getId)
+                        .collect(Collectors.toList()));
+
+        /**
+         * Board 제거 CASCADE 설정으로 BoardAttachment 전부 같이 삭제
+         */
+        boardRepository.delete(board);
+
     }
 
     /**
@@ -185,11 +191,12 @@ public class BoardService {
     /**
      * 게시물 좋아요
      * @param boardId
-     * @param memberId
+     * @param member
      * @return
      */
 
-    public void addLikes(Long boardId,Member member){
+    @Transactional
+    public void addOrCancelLikes(Long boardId,Member member){
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new IllegalArgumentException("not found : "+ boardId));
 
         if (isNotAlreadyLike(member,board)){
@@ -206,6 +213,7 @@ public class BoardService {
      * @return
      */
 
+    @Transactional
     public boolean cancelLikes(Long boardId, Long memberId){
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new IllegalArgumentException("not found : "+ boardId));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("not found : " + memberId));
