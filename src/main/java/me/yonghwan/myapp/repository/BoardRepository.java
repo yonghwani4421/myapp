@@ -25,8 +25,4 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     @Query("select b from Board b where b.status = 'Y'")
     Page<Board> findAll(Pageable pageable);
 
-
-//    @Modifying
-//    @Query("delete from Board b where b.id = :boardId")
-//    void deleteById(@Param("boardId") Long boardId);
 }
