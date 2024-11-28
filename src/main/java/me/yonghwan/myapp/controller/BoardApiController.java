@@ -168,11 +168,6 @@ public class BoardApiController {
     }
 
 
-
-
-
-
-
     @Operation(summary = "게시물 좋아요", description = "게시물 좋아요 / 좋아요 취소")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "삭제 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),

@@ -42,6 +42,14 @@ public class Board extends BaseEntity{
     @OneToMany(mappedBy = "board", cascade =CascadeType.ALL, orphanRemoval = true)
     private List<BoardLikes> boardLikes = new ArrayList<>();
 
+    /**
+     * BoardComment
+     *  1 : N 관계
+     */
+
+    @OneToMany(mappedBy = "board", cascade =CascadeType.ALL, orphanRemoval = true)
+    private List<BoardComment> comments = new ArrayList<>();
+
     public Board(String title, String content, Member member) {
         this.title = title;
         this.content = content;

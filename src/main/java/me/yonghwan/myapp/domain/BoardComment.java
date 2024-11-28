@@ -31,7 +31,7 @@ public class BoardComment extends BaseEntity{
     @JoinColumn(name = "parent_id")
     private BoardComment parentComment;
 
-    @OneToMany(mappedBy = "parentCommnet")
+    @OneToMany(mappedBy = "parentComment", orphanRemoval = true)
     private List<BoardComment> childComments = new ArrayList<>();
 
     public BoardComment(String content, Member member, Board board, BoardComment parentCommnet) {

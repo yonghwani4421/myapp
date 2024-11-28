@@ -47,7 +47,6 @@ public class Member extends BaseTimeEntity{
     @OneToMany(mappedBy = "member", cascade =CascadeType.ALL, orphanRemoval = true)
     private List<Board> boards  = new ArrayList<>();
 
-
     /**
      * 나의 매너 점수를 계산해주는 함수
      * @return
