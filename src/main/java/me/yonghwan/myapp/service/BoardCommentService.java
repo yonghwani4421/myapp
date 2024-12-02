@@ -67,7 +67,7 @@ public class BoardCommentService {
      * @return
      */
     public List<BoardCommentResponse> getCommentsByBoardId(Long boardId) {
-        List<BoardComment> comments = boardCommentRepository.findCommentsByBoardId(boardId);
+        List<BoardComment> comments = boardRepository.findCommentsByBoardId(boardId);
         List<BoardCommentResponse> commentResponses = new ArrayList<>();
 
         Map<Long, BoardCommentResponse> map = new HashMap<>();

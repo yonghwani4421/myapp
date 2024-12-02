@@ -11,8 +11,10 @@ import lombok.RequiredArgsConstructor;
 import me.yonghwan.myapp.common.codes.SuccessCode;
 import me.yonghwan.myapp.common.response.CommonResponse;
 import me.yonghwan.myapp.domain.Board;
+import me.yonghwan.myapp.domain.BoardComment;
 import me.yonghwan.myapp.dto.*;
 import me.yonghwan.myapp.helper.SessionUtil;
+import me.yonghwan.myapp.service.BoardCommentService;
 import me.yonghwan.myapp.service.BoardService;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.data.domain.Page;
@@ -32,6 +34,7 @@ public class BoardApiController {
 
     private final BoardService boardService;
     private final SessionUtil sessionUtil;
+    private final BoardCommentService boardCommentService;
 
     @Operation(summary = "게시물 리스트", description = "게시물 리스트 조회")
     @ApiResponses(value = {
@@ -70,8 +73,9 @@ public class BoardApiController {
 //    @GetMapping
 //    public CommonResponse<BoardResponse> getBoard(
 //                        @Parameter(description = "게시물 id")
-//                        @PathVariable("id") Long id){
-//        Board board = boardService.findById(id);
+//                        @PathVariable("id") Long boardId){
+//
+//
 //
 //
 //        return CommonResponse.<BoardResponse>builder()
@@ -118,14 +122,14 @@ public class BoardApiController {
     @PutMapping("/{id}")
     public CommonResponse<BoardResponse> boardUpdate(
             @Parameter(description = "게시물 id")
-            @PathVariable("id") Long id,
+            @PathVariable("id") Long boardId,
 
             @Parameter(description = "게시물 요청 데이터")
             @RequestPart(value = "board") BoardRequest request,
 
             @Parameter(description = "추가될 파일")
             @RequestPart(value = "file", required = false)List<MultipartFile> files) {
-        Board board = boardService.updateBoard(request, files, id);
+        Board board = boardService.updateBoard(request, files, boardId);
         return CommonResponse.<BoardResponse>builder()
                 .result(
                         new BoardResponse(board.getId(), board.getTitle(),board.getContent()
@@ -143,8 +147,8 @@ public class BoardApiController {
     @DeleteMapping("/{id}")
     public CommonResponse<Void> boardDelete(
             @Parameter(description = "게시물 id")
-            @PathVariable("id") Long id) {
-        boardService.deleteBoardById(id);
+            @PathVariable("id") Long boardId) {
+        boardService.deleteBoardById(boardId);
         return CommonResponse.<Void>builder()
                 .resultCode(SuccessCode.DELETE_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.DELETE_SUCCESS.getMessage())
@@ -159,8 +163,8 @@ public class BoardApiController {
     @PutMapping("/{id}/status")
     public CommonResponse<Void> boardStatusChange(
             @Parameter(description = "게시물 id")
-            @PathVariable("id") Long id) {
-        boardService.changeStatus(id);
+            @PathVariable("id") Long boardId) {
+        boardService.changeStatus(boardId);
         return CommonResponse.<Void>builder()
                 .resultCode(SuccessCode.DELETE_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.DELETE_SUCCESS.getMessage())
@@ -170,18 +174,43 @@ public class BoardApiController {
 
     @Operation(summary = "게시물 좋아요", description = "게시물 좋아요 / 좋아요 취소")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "삭제 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
-            @ApiResponse(responseCode = "400", description = "삭제 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
+            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
+            @ApiResponse(responseCode = "400", description = "실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
     })
     @PostMapping("/{id}/likes")
     public CommonResponse<Void> boardLike(
             @Parameter(description = "게시물 id")
-            @PathVariable("id") Long id) {
-        boardService.addOrCancelLikes(id, sessionUtil.getMemberSesson());
+            @PathVariable("id") Long boardId) {
+        boardService.addOrCancelLikes(boardId, sessionUtil.getMemberSesson());
         return CommonResponse.<Void>builder()
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
                 .build();
     }
+
+
+    @Operation(summary = "게시물 댓글 작성", description = "게시물 댓글 작성")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
+            @ApiResponse(responseCode = "400", description = "삭제 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
+    })
+    @PostMapping("/{id}/comment")
+    public CommonResponse<BoardCommentResponse> boardComment(
+            @Parameter(description = "게시물 id")
+            @PathVariable("id") Long boardId,
+
+            @Parameter(description = "게시물 댓글 요청값")
+            @RequestBody BoardCommentRequest request) {
+
+        return CommonResponse.<BoardCommentResponse>builder()
+                .result(
+                        new BoardCommentResponse(boardCommentService.createComment(request, boardId))
+                )
+                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .build();
+    }
+
+
 
 }

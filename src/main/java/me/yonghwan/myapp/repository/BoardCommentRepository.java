@@ -1,13 +1,12 @@
 package me.yonghwan.myapp.repository;
 
-import me.yonghwan.myapp.domain.BoardAttachment;
 import me.yonghwan.myapp.domain.BoardComment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface BoardCommentRepository extends JpaRepository<BoardComment, Long>, BoardCommentRepositoryCustom {
+public interface BoardCommentRepository extends JpaRepository<BoardComment, Long> {
 
     /**
      * 댓글 리스트 조회 단순히 flat 조회

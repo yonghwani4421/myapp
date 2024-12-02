@@ -16,12 +16,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,9 +44,13 @@ class BoardCommentServiceTest {
     MemberRepository memberRepository;
     @Autowired
     BoardRepository boardRepository;
+    @Autowired
+    BoardService boardService;
 
     Member member;
     Board board;
+
+    private static final String PATH = "C:\\workspace\\test.txt";
 
 
     @BeforeEach
@@ -125,8 +135,9 @@ class BoardCommentServiceTest {
         String content = "댓글";
         BoardCommentRequest comment1 = new BoardCommentRequest(null, content);
         BoardCommentRequest comment2 = new BoardCommentRequest(null, content);
-        BoardComment boardComment = boardCommentService.createComment(comment1, board.getId());
-        BoardCommentRequest comment3 = new BoardCommentRequest(boardComment.getId(), content);
+        BoardComment boardComment1 = boardCommentService.createComment(comment1, board.getId());
+        BoardComment boardComment2 = boardCommentService.createComment(comment2, board.getId());
+        BoardCommentRequest comment3 = new BoardCommentRequest(boardComment1.getId(), content);
         boardCommentService.createComment(comment3,board.getId());
 
         // when
@@ -136,9 +147,52 @@ class BoardCommentServiceTest {
         printComment(boardCommentList);
 
         // then
+        assertEquals(boardCommentList.get(0).getId(),1);
         assertFalse(boardCommentList.get(0).getChildComments().isEmpty(),"계층 하위에 있다.");
         assertEquals(boardCommentList.get(0).getContent(),boardCommentList.get(0).getChildComments().get(0).getContent(),"두 계층은 댓글 내용이 같아야한다.");
     }
+
+
+    @Test
+    @DisplayName("게시물 디테일 조회")
+    public void boardDetailSelect() throws Exception{
+        // given
+
+        File file = new File(PATH);
+        assertTrue(file.exists(), "파일이 존재해야 합니다.");
+
+        Board board = boardService.saveBoardWithAttachments(new Board("title1", "content1",member)
+                , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
+
+
+        BoardCommentRequest comment1 = new BoardCommentRequest(null, "댓글1");
+        BoardCommentRequest comment2 = new BoardCommentRequest(null, "댓글2");
+        BoardComment boardComment1 = boardCommentService.createComment(comment1, board.getId());
+        BoardComment boardComment2 = boardCommentService.createComment(comment2, board.getId());
+        BoardCommentRequest comment3 = new BoardCommentRequest(boardComment1.getId(), "댓글3");
+        boardCommentService.createComment(comment3,board.getId());
+
+
+        List<BoardCommentResponse> comments = boardCommentService.getCommentsByBoardId(board.getId());
+
+        // when
+
+        // then
+    }
+
+
+    public static MultipartFile convertToMultipartFile(File file) throws IOException {
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            return new MockMultipartFile(
+                    file.getName(),                // MultipartFile의 이름
+                    file.getName(),                // 원본 파일 이름
+                    "application/octet-stream",    // MIME 타입 (필요시 설정)
+                    inputStream                    // 파일 데이터
+            );
+        }
+    }
+
+
 
     private static void printComment(List<BoardCommentResponse> boardCommentList) {
         for (BoardCommentResponse boardCommentResponse : boardCommentList) {

@@ -6,6 +6,7 @@ import me.yonghwan.myapp.domain.Board;
 import me.yonghwan.myapp.domain.BoardAttachment;
 import me.yonghwan.myapp.domain.BoardLikes;
 import me.yonghwan.myapp.domain.Member;
+import me.yonghwan.myapp.dto.BoardDetailResponse;
 import me.yonghwan.myapp.dto.BoardRequest;
 import me.yonghwan.myapp.helper.FileUtil;
 import me.yonghwan.myapp.repository.BoardAttachmentRepository;
@@ -236,6 +237,7 @@ public class BoardService {
     public Page<Board> getBoardList(Pageable pageable){
          return boardRepository.findAll(pageable);
     }
+
 
 
 }

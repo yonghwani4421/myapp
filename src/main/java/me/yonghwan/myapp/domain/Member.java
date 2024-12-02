@@ -46,6 +46,15 @@ public class Member extends BaseTimeEntity{
 
     @OneToMany(mappedBy = "member", cascade =CascadeType.ALL, orphanRemoval = true)
     private List<Board> boards  = new ArrayList<>();
+    /**
+     * Post 양방향
+     */
+    @OneToMany(mappedBy = "member")
+    private List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "buyer")
+    private List<Trade> trades  = new ArrayList<>();
+
 
     /**
      * 나의 매너 점수를 계산해주는 함수

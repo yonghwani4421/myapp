@@ -3,7 +3,6 @@ package me.yonghwan.myapp.repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import me.yonghwan.myapp.domain.BoardComment;
-import me.yonghwan.myapp.domain.QBoardComment;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,13 +11,14 @@ import static me.yonghwan.myapp.domain.QBoardComment.boardComment;
 
 @RequiredArgsConstructor
 @Repository
-public class BoardCommentRepositoryCustomImpl implements BoardCommentRepositoryCustom{
+public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
     @Override
     public List<BoardComment> findCommentsByBoardId(Long boardId) {
         return queryFactory
-                .selectFrom(boardComment)
+                .select(boardComment)
+                .from(boardComment)
                 .leftJoin(boardComment.childComments)
                 .fetchJoin() // 자식 댓글 페치 조인
                 .where(

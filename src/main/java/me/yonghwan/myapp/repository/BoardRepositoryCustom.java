@@ -4,6 +4,7 @@ import me.yonghwan.myapp.domain.BoardComment;
 
 import java.util.List;
 
-public interface BoardCommentRepositoryCustom {
+public interface BoardRepositoryCustom {
     List<BoardComment> findCommentsByBoardId(Long boardId);
+
 }
