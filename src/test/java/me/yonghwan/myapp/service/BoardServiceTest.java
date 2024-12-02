@@ -20,6 +20,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Transactional
+@Rollback(value = false)
 class BoardServiceTest {
 
     @Autowired
@@ -134,16 +136,12 @@ class BoardServiceTest {
                 , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
 
         Long id = board.getBoardAttachments().get(0).getId();
-        boardService.updateBoard(new BoardRequest("title2","content2",Arrays.asList(id))
-                ,Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)),board.getId());
+        Board updateBoard = boardService.updateBoard(new BoardRequest("title2", "content2", Arrays.asList(id))
+                , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)), board.getId());
 
-        em.flush();
-        em.clear();
 
-        Board findBoard = boardService.findById(board.getId());
-
-        assertEquals(findBoard.getTitle(),"title2", "제목이 title2으로 정상적으로 들어가야합니다.");
-        assertEquals(findBoard.getBoardAttachments().size(),3,"파일의 갯수가 맞아야합니다.");
+        assertEquals(updateBoard.getTitle(),"title2", "제목이 title2으로 정상적으로 들어가야합니다.");
+        assertEquals(updateBoard.getBoardAttachments().size(),3,"파일의 갯수가 맞아야합니다.");
     }
     @Test
     @DisplayName("게시물을 삭제한다.")

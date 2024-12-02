@@ -50,9 +50,13 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath phoneNum = createString("phoneNum");
 
+    public final ListPath<Post, QPost> posts = this.<Post, QPost>createList("posts", Post.class, QPost.class, PathInits.DIRECT2);
+
     public final ListPath<Manner, QManner> receiver = this.<Manner, QManner>createList("receiver", Manner.class, QManner.class, PathInits.DIRECT2);
 
     public final EnumPath<Role> role = createEnum("role", Role.class);
+
+    public final ListPath<Trade, QTrade> trades = this.<Trade, QTrade>createList("trades", Trade.class, QTrade.class, PathInits.DIRECT2);
 
     public QMember(String variable) {
         this(Member.class, forVariable(variable), INITS);

@@ -6,7 +6,6 @@ import me.yonghwan.myapp.domain.Board;
 import me.yonghwan.myapp.domain.BoardAttachment;
 import me.yonghwan.myapp.domain.BoardLikes;
 import me.yonghwan.myapp.domain.Member;
-import me.yonghwan.myapp.dto.BoardDetailResponse;
 import me.yonghwan.myapp.dto.BoardRequest;
 import me.yonghwan.myapp.helper.FileUtil;
 import me.yonghwan.myapp.repository.BoardAttachmentRepository;
@@ -56,6 +55,7 @@ public class BoardService {
      * @param board
      * @param files
      */
+    @Transactional
     public void saveAttachments(Board board, List<MultipartFile> files) {
         String[] uploadedFileUrls = s3Service.uploadFiles(files).split(",");
         List<Long> fileSize = files.stream().map(MultipartFile::getSize).collect(Collectors.toList());
@@ -108,11 +108,12 @@ public class BoardService {
         findById(id).changeStatus();
     }
 
+    @Transactional
     private void deleteS3Files(List<BoardAttachment> boardAttachments, List<Long> deleteFileIds) {
         for (BoardAttachment boardAttachment : boardAttachments) {
             if(deleteFileIds.contains(boardAttachment.getId())){
                 s3Service.deleteFile(fileUtil.convertToFileName(boardAttachment.getAttachmentUrl()));
-                boardAttachment.deleteBoard();
+                boardAttachments.remove(boardAttachment);
             }
         }
     }

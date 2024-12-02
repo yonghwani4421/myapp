@@ -15,13 +15,27 @@ public class PostPhoto extends BaseEntity{
     private Long id;
 
     private String photoName;
-    private int photoSize;
+    private Long photoSize;
     private String photoUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
 
+    public PostPhoto(String photoName, Long photoSize, String photoUrl) {
+        this.photoName = photoName;
+        this.photoSize = photoSize;
+        this.photoUrl = photoUrl;
+    }
 
+    public void setPost(Post post) {
+        this.post = post;
+    }
 
+    /**
+     * 명시적인 행위
+     */
+    public void deletePost() {
+        this.post = null;
+    }
 }
