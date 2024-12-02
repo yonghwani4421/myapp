@@ -49,9 +49,11 @@
 
 ### 설계
 
-
+![캡처](https://github.com/user-attachments/assets/3c722657-0a0c-4945-a3c5-30daa16af284)
+![member](https://github.com/user-attachments/assets/aff82f74-513b-41c9-aabe-d874aa994332)
+![board](https://github.com/user-attachments/assets/bd23f1b6-227d-4359-b737-06452fbd1a7a)
+![post](https://github.com/user-attachments/assets/3d30b8ea-83db-4b6a-9323-598107cd7ff0)
 ---
-
 ### 개발에 따른 커밋 메시지 타입(Type)
 
 | **타입 이름** | **내용**                                      |
