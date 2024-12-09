@@ -57,11 +57,13 @@ class PostServiceTest {
     private static final String PATH = "C:\\workspace\\test.txt";
 
     Member m1;
+    Member m2;
 
     @BeforeEach
     public void before(){
         memberRepository.deleteAll(); // 기존 데이터 초기화
         m1 = createMember("test1@gmail.com", "곱창국수1");
+        m2 = createMember("test2@gmail.com", "곱창국수2");
         LoginMember member = new LoginMember();
         member.setEmail(m1.getEmail());
         member.setPassword("temppassword");
@@ -135,6 +137,43 @@ class PostServiceTest {
         assertEquals(updatePost.getTitle(),"title2", "제목이 title2으로 정상적으로 들어가야합니다.");
         assertEquals(updatePost.getPhotos().size(),3, "갯수가 3개 이상이여야 합니다.");
     }
+
+    @Test
+    @DisplayName("거래 게시물을 삭제한다.")
+    public void deletePost() throws Exception{
+        File file = new File(PATH);
+        assertTrue(file.exists(), "파일이 존재해야 합니다.");
+
+        PostSaveRequest request = new PostSaveRequest("title1", "content1", "A", 10000.0, "장기동", 1000.0, 1000.0);
+
+        Post post = postService.savePostWithAttachment(request.toEntity(m1)
+                , Arrays.asList(convertToMultipartFile(file), convertToMultipartFile(file)));
+
+        // when
+        Long id = post.getId();
+        postService.deletePost(id);
+
+        // then
+        assertFalse(postService.existsByPostId(id));
+
+    }
+    @Test
+    @DisplayName("거래 게시물에 좋아요/ 좋아요 취소를 한다.")
+    public void postLikeOrCancel() throws Exception{
+        // given
+        PostSaveRequest request = new PostSaveRequest("title1", "content1", "A", 10000.0, "장기동", 1000.0, 1000.0);
+
+        Post post = postService.savePostWithAttachment(request.toEntity(m1), Arrays.asList());
+
+        // when
+        postService.addOrCancelLikes(post,m2);
+        assertTrue(postService.existsByMemberAndPost(m2,post));
+        assertEquals(postService.countByPost(post),1,"좋아요 갯수가 정확히 맞아야한다.");
+        postService.addOrCancelLikes(post,m2);
+        assertFalse(postService.existsByMemberAndPost(m2,post));
+        assertEquals(postService.countByPost(post),0,"좋아요 갯수가 정확히 맞아야한다.");
+    }
+
 
 
 

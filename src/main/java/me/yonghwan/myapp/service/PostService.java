@@ -2,19 +2,20 @@ package me.yonghwan.myapp.service;
 
 import lombok.RequiredArgsConstructor;
 import me.yonghwan.myapp.aws.service.S3Service;
-import me.yonghwan.myapp.domain.Board;
-import me.yonghwan.myapp.domain.BoardAttachment;
-import me.yonghwan.myapp.domain.Post;
-import me.yonghwan.myapp.domain.PostPhoto;
+import me.yonghwan.myapp.domain.*;
 import me.yonghwan.myapp.dto.BoardRequest;
 import me.yonghwan.myapp.dto.PostRequest;
 import me.yonghwan.myapp.helper.FileUtil;
+import me.yonghwan.myapp.repository.PostLikesRepository;
+import me.yonghwan.myapp.repository.PostPhotoRepository;
 import me.yonghwan.myapp.repository.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +26,8 @@ public class PostService {
     private final S3Service s3Service;
     private final FileUtil fileUtil;
     private final PostRepository postRepository;
+    private final PostPhotoRepository postPhotoRepository;
+    private final PostLikesRepository postLikesRepository;
 
     /**
      * 거래 게시물 저장
@@ -105,10 +108,53 @@ public class PostService {
         for (PostPhoto photo : photos) {
             if(deleteFileIds.contains(photo.getId())){
                 s3Service.deleteFile(fileUtil.convertToFileName(photo.getPhotoUrl()));
-                photos.remove(photo);
+//                photos.remove(photo);
             }
         }
     }
 
 
+    /**
+     * 거래 게시물 삭제 + aws 에서 삭제
+     * @param id
+     */
+    public void deletePost(Long id) {
+        List<PostPhoto> photo = postPhotoRepository.findByPostId(id).orElseThrow(() -> new IllegalArgumentException("not found : " + id));
+        List<Long> deleteFileIds = new ArrayList<>();
+        photo.stream().forEach(postPhoto -> {
+            deleteFileIds.add(postPhoto.getId());
+        });
+
+        // aws 삭제
+        deleteS3Files(photo, deleteFileIds);
+
+        // 나머지 테이블에서 삭제 연쇄삭제 됨
+        postRepository.deleteById(id);
+    }
+
+    public Boolean existsByPostId(Long postId) {
+        return postRepository.existsById(postId);
+    }
+
+    /**
+     * 게시물 좋아요 / 좋아요 취소
+     * @param post
+     * @param member
+     */
+    @Transactional
+    public void addOrCancelLikes(Post post, Member member) {
+        if (!existsByMemberAndPost(member,post)){
+            postLikesRepository.save(new PostLikes(post,member));
+        } else {
+            postLikesRepository.deleteByMemberAndPost(member,post);
+        }
+    }
+
+    public Boolean existsByMemberAndPost(Member member,Post post){
+        return postLikesRepository.existsByMemberAndPost(member,post);
+    }
+
+    public Long countByPost(Post post){
+       return postLikesRepository.countByPost(post).orElseThrow(()-> new IllegalArgumentException("not found : " + post.getId()));
+    }
 }

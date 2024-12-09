@@ -41,6 +41,10 @@ public class Post extends BaseEntity{
     private List<PostPhoto> photos = new ArrayList<>();
 
 
+    @OneToMany(mappedBy = "post", cascade =CascadeType.ALL, orphanRemoval = true)
+    private List<PostLikes> postLikes = new ArrayList<>();
+
+
     public Post(String title, String content, String tradeType, Double price, String placeName, Double latitude, Double longitude, Member member) {
         this.title = title;
         this.content = content;
