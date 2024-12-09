@@ -2,9 +2,11 @@ package me.yonghwan.myapp.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.yonghwan.myapp.dto.PostRequest;
+import me.yonghwan.myapp.dto.PostResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +46,7 @@ public class Post extends BaseEntity{
     @OneToMany(mappedBy = "post", cascade =CascadeType.ALL, orphanRemoval = true)
     private List<PostLikes> postLikes = new ArrayList<>();
 
-
+    @Builder
     public Post(String title, String content, String tradeType, Double price, String placeName, Double latitude, Double longitude, Member member) {
         this.title = title;
         this.content = content;
@@ -54,6 +56,19 @@ public class Post extends BaseEntity{
         this.latitude = latitude;
         this.longitude = longitude;
         this.member = member;
+    }
+
+    public PostResponse toResponse(){
+        return PostResponse.builder()
+                .id(id)
+                .title(title)
+                .content(content)
+                .tradeType(tradeType)
+                .placeName(placeName)
+                .price(price)
+                .latitude(latitude)
+                .longitude(longitude)
+                .build();
     }
 
 

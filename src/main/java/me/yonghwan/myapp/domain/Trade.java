@@ -2,6 +2,7 @@ package me.yonghwan.myapp.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +23,9 @@ public class Trade extends BaseTimeEntity{
     @JoinColumn(name = "buyer_id")
     private Member buyer;
 
-
-
+    @Builder
+    public Trade(Post post, Member buyer) {
+        this.post = post;
+        this.buyer = buyer;
+    }
 }

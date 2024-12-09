@@ -1,12 +1,15 @@
 package me.yonghwan.myapp.dto;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.domain.Post;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostSaveRequest {
 
     private String title;
@@ -18,6 +21,14 @@ public class PostSaveRequest {
     private Double longitude;
 
     public Post toEntity(Member member){
-        return new Post(title,content,tradeType,price,placeName,latitude,longitude,member);
+        return Post.builder()
+                .member(member)
+                .content(content)
+                .title(title)
+                .price(price)
+                .tradeType(tradeType)
+                .placeName(placeName)
+                .latitude(latitude)
+                .longitude(longitude).build();
     }
 }

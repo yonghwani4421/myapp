@@ -19,6 +19,10 @@ public class PostRequest {
     private Double latitude;
     private Double longitude;
     private List<Long> deleteFileIds;
+
+    public PostRequest() {
+    }
+
     public Post toEntity(Member member){
         return new Post(title,content,tradeType,price,placeName,latitude,longitude,member);
     }

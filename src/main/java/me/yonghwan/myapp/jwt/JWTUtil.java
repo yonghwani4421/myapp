@@ -19,6 +19,7 @@ public class JWTUtil {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
+
     /**
      * 토큰의 email 검증하는 메소드
      * @param token

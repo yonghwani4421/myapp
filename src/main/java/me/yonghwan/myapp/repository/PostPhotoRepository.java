@@ -21,4 +21,12 @@ public interface PostPhotoRepository  extends JpaRepository<PostPhoto, Long> {
 
 
     Optional<List<PostPhoto>> findByPostId(Long id);
+
+    /**
+     * 사진 삭제 벌크 연산
+     * @param deleteFileIds
+     */
+    @Modifying
+    @Query("delete from PostPhoto pp where pp.id IN :ids")
+    int deleteByIds(@Param("ids") List<Long> deleteFileIds);
 }

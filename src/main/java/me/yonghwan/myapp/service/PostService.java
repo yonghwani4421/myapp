@@ -9,6 +9,7 @@ import me.yonghwan.myapp.helper.FileUtil;
 import me.yonghwan.myapp.repository.PostLikesRepository;
 import me.yonghwan.myapp.repository.PostPhotoRepository;
 import me.yonghwan.myapp.repository.PostRepository;
+import me.yonghwan.myapp.repository.TradeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +29,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostPhotoRepository postPhotoRepository;
     private final PostLikesRepository postLikesRepository;
+    private final TradeRepository tradeRepository;
 
     /**
      * 거래 게시물 저장
@@ -90,7 +92,10 @@ public class PostService {
         /**
          * 제거될 파일 제거 S3에서도 제거
          */
-        deleteS3Files(photos, deleteFileIds);
+        if (deleteFileIds.size() > 0){
+            deleteS3Files(photos, deleteFileIds);
+            deletePostPhoto(deleteFileIds);
+        }
         /**
          * 변경된 내용 수정 변경감지
          */
@@ -104,11 +109,15 @@ public class PostService {
         return post;
 
     }
+
+    private int deletePostPhoto(List<Long> deleteFileIds) {
+        return postPhotoRepository.deleteByIds(deleteFileIds);
+    }
+
     private void deleteS3Files(List<PostPhoto> photos, List<Long> deleteFileIds) {
         for (PostPhoto photo : photos) {
             if(deleteFileIds.contains(photo.getId())){
                 s3Service.deleteFile(fileUtil.convertToFileName(photo.getPhotoUrl()));
-//                photos.remove(photo);
             }
         }
     }
@@ -116,10 +125,11 @@ public class PostService {
 
     /**
      * 거래 게시물 삭제 + aws 에서 삭제
-     * @param id
+     * @param postId
      */
-    public void deletePost(Long id) {
-        List<PostPhoto> photo = postPhotoRepository.findByPostId(id).orElseThrow(() -> new IllegalArgumentException("not found : " + id));
+    @Transactional
+    public void deletePost(Long postId) {
+        List<PostPhoto> photo = postPhotoRepository.findByPostId(postId).orElseThrow(() -> new IllegalArgumentException("not found : " + postId));
         List<Long> deleteFileIds = new ArrayList<>();
         photo.stream().forEach(postPhoto -> {
             deleteFileIds.add(postPhoto.getId());
@@ -129,7 +139,7 @@ public class PostService {
         deleteS3Files(photo, deleteFileIds);
 
         // 나머지 테이블에서 삭제 연쇄삭제 됨
-        postRepository.deleteById(id);
+        postRepository.deleteById(postId);
     }
 
     public Boolean existsByPostId(Long postId) {
@@ -150,11 +160,33 @@ public class PostService {
         }
     }
 
+    /**
+     * 좋아요 존재 여부 확인
+     * @param member
+     * @param post
+     * @return
+     */
     public Boolean existsByMemberAndPost(Member member,Post post){
         return postLikesRepository.existsByMemberAndPost(member,post);
     }
 
-    public Long countByPost(Post post){
+    /**
+     * 게시물 좋아요 갯수
+     * @param post
+     * @return
+     */
+    public Long countPostLikesByPost(Post post){
        return postLikesRepository.countByPost(post).orElseThrow(()-> new IllegalArgumentException("not found : " + post.getId()));
+    }
+
+
+    /**
+     * 거래 게시물 거래 체결
+     * @param trade
+     * @return
+     */
+    @Transactional
+    public Trade createTrade(Trade trade) {
+        return tradeRepository.save(trade);
     }
 }

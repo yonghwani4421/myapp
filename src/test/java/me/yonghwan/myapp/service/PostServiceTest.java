@@ -3,10 +3,7 @@ package me.yonghwan.myapp.service;
 import jakarta.persistence.EntityManager;
 import me.yonghwan.myapp.aws.config.AwsS3Properties;
 import me.yonghwan.myapp.aws.service.S3Service;
-import me.yonghwan.myapp.domain.Board;
-import me.yonghwan.myapp.domain.Member;
-import me.yonghwan.myapp.domain.Post;
-import me.yonghwan.myapp.domain.Role;
+import me.yonghwan.myapp.domain.*;
 import me.yonghwan.myapp.dto.CustomMemberDetails;
 import me.yonghwan.myapp.dto.LoginMember;
 import me.yonghwan.myapp.dto.PostRequest;
@@ -168,16 +165,32 @@ class PostServiceTest {
         // when
         postService.addOrCancelLikes(post,m2);
         assertTrue(postService.existsByMemberAndPost(m2,post));
-        assertEquals(postService.countByPost(post),1,"좋아요 갯수가 정확히 맞아야한다.");
+        assertEquals(postService.countPostLikesByPost(post),1,"좋아요 갯수가 정확히 맞아야한다.");
         postService.addOrCancelLikes(post,m2);
         assertFalse(postService.existsByMemberAndPost(m2,post));
-        assertEquals(postService.countByPost(post),0,"좋아요 갯수가 정확히 맞아야한다.");
+        assertEquals(postService.countPostLikesByPost(post),0,"좋아요 갯수가 정확히 맞아야한다.");
     }
 
+    @Test
+    @DisplayName("거래 게시물이 거래가 완료됌")
+    public void trade() throws Exception{
+        // given
 
+        Member buyer = m2;
 
+        PostSaveRequest request = new PostSaveRequest("title1", "content1", "A", 10000.0, "장기동", 1000.0, 1000.0);
+        Post post = postService.savePostWithAttachment(request.toEntity(m1), Arrays.asList());
 
+        // when
 
+        Trade trade = postService.createTrade(Trade.builder()
+                .post(post)
+                .buyer(m2).build());
+
+        // then
+        assertEquals(trade.getPost(), post);
+        assertEquals(trade.getBuyer(), m2);
+    }
     public static MultipartFile convertToMultipartFile(File file) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(file)) {
             return new MockMultipartFile(

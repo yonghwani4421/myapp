@@ -2,6 +2,7 @@ package me.yonghwan.myapp.repository;
 
 import me.yonghwan.myapp.domain.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,4 +20,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             " p.photos" +
             " where p.id = :postId")
     Optional<Post> findByIdWithPhotos(@Param("postId") Long postId);
+
 }

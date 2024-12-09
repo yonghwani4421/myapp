@@ -18,4 +18,6 @@ public class BoardResponse {
         this.content = content;
         this.attachment = attachment;
     }
+
+
 }
