@@ -55,6 +55,9 @@ public class Member extends BaseTimeEntity{
     @OneToMany(mappedBy = "buyer")
     private List<Trade> trades  = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", cascade =CascadeType.ALL, orphanRemoval = true)
+    private List<Neighborhoods> neighborhoodsList  = new ArrayList<>();
+
 
     /**
      * 나의 매너 점수를 계산해주는 함수

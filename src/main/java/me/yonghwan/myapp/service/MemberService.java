@@ -2,9 +2,12 @@ package me.yonghwan.myapp.service;
 
 import lombok.RequiredArgsConstructor;
 import me.yonghwan.myapp.domain.Member;
+import me.yonghwan.myapp.domain.Neighborhoods;
 import me.yonghwan.myapp.dto.MemberRequest;
 import me.yonghwan.myapp.dto.MemberUpdateRequest;
+import me.yonghwan.myapp.dto.NeighborhoodsRequest;
 import me.yonghwan.myapp.repository.MemberRepository;
+import me.yonghwan.myapp.repository.NeighborhoodsRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,7 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final NeighborhoodsRepository neighborhoodsRepository;
 
     /**
      * 회원 등록
@@ -69,5 +73,17 @@ public class MemberService {
                 , request.getAddressDetail()
                 , request.getZipCode());
     }
+
+    /**
+     * 우리 동네 저장
+     * @param request
+     * @param member
+     * @return
+     */
+    @Transactional
+    public Neighborhoods saveNeighborhoods(NeighborhoodsRequest request,Member member){
+        return neighborhoodsRepository.save(request.toEntity(member));
+    }
+
 
 }

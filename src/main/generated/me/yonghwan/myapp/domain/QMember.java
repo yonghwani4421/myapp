@@ -44,6 +44,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath name = createString("name");
 
+    public final ListPath<Neighborhoods, QNeighborhoods> neighborhoodsList = this.<Neighborhoods, QNeighborhoods>createList("neighborhoodsList", Neighborhoods.class, QNeighborhoods.class, PathInits.DIRECT2);
+
     public final StringPath nickName = createString("nickName");
 
     public final StringPath password = createString("password");
