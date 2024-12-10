@@ -3,20 +3,22 @@ package me.yonghwan.myapp.service;
 import lombok.RequiredArgsConstructor;
 import me.yonghwan.myapp.aws.service.S3Service;
 import me.yonghwan.myapp.domain.*;
-import me.yonghwan.myapp.dto.BoardRequest;
+import me.yonghwan.myapp.dto.PostListResponse;
 import me.yonghwan.myapp.dto.PostRequest;
+import me.yonghwan.myapp.dto.PostSearchRequest;
 import me.yonghwan.myapp.helper.FileUtil;
 import me.yonghwan.myapp.repository.PostLikesRepository;
 import me.yonghwan.myapp.repository.PostPhotoRepository;
 import me.yonghwan.myapp.repository.PostRepository;
 import me.yonghwan.myapp.repository.TradeRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -188,5 +190,15 @@ public class PostService {
     @Transactional
     public Trade createTrade(Trade trade) {
         return tradeRepository.save(trade);
+    }
+
+    /**
+     * 거래 게시물 리스트 조회 10 개씩 조회
+     * @param searchRequest
+     * @param pageable
+     * @return
+     */
+    public Slice<PostListResponse> searchPostWithSlice(PostSearchRequest searchRequest, Pageable pageable){
+        return postRepository.searchPostWithSlice(searchRequest,pageable);
     }
 }

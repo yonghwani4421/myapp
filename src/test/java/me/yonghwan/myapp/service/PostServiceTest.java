@@ -4,10 +4,7 @@ import jakarta.persistence.EntityManager;
 import me.yonghwan.myapp.aws.config.AwsS3Properties;
 import me.yonghwan.myapp.aws.service.S3Service;
 import me.yonghwan.myapp.domain.*;
-import me.yonghwan.myapp.dto.CustomMemberDetails;
-import me.yonghwan.myapp.dto.LoginMember;
-import me.yonghwan.myapp.dto.PostRequest;
-import me.yonghwan.myapp.dto.PostSaveRequest;
+import me.yonghwan.myapp.dto.*;
 import me.yonghwan.myapp.helper.FileUtil;
 import me.yonghwan.myapp.repository.MemberRepository;
 import me.yonghwan.myapp.repository.PostRepository;
@@ -16,6 +13,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -72,6 +72,17 @@ class PostServiceTest {
         Authentication authToken = new UsernamePasswordAuthenticationToken(customMemberDetails, null, customMemberDetails.getAuthorities());
         //세션에 사용자 등록
         SecurityContextHolder.getContext().setAuthentication(authToken);
+
+        String placeName = "";
+        for (int i = 0; i < 100; i++) {
+
+            if (i % 2 == 0){
+                placeName = "장기동";
+            } else {
+                placeName = "운양동";
+            }
+            postService.savePostWithAttachment(new PostSaveRequest("title"+i, "content"+i, "P", 10000.0, placeName, 1000.0, 1000.0).toEntity(m1), Arrays.asList());
+        }
     }
 
     private Member createMember(String email, String nickName) {
@@ -172,7 +183,7 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("거래 게시물이 거래가 완료됌")
+    @DisplayName("거래 게시물이 거래 체결")
     public void trade() throws Exception{
         // given
 
@@ -191,6 +202,29 @@ class PostServiceTest {
         assertEquals(trade.getPost(), post);
         assertEquals(trade.getBuyer(), m2);
     }
+
+    @Test
+    @DisplayName("거래 게시물 리스트 조회")
+    public void getPostList() throws Exception{
+        // given
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        PostSearchRequest request = PostSearchRequest.builder()
+                .placeName("장기동")
+                .title("title")
+                .build();
+
+        // when
+        Slice<PostListResponse> list = postService.searchPostWithSlice(request, pageRequest);
+
+        // then
+        assertEquals(list.getContent().size(),10, "페이지 크기가 10이어야 합니다.");
+        assertTrue(list.hasNext(), "다음 페이지가 있어야 합니다.");
+        assertEquals("장기동", list.getContent().get(0).getPlaceName(), "첫 번째 게시물의 장소가 '장기동'이어야 합니다.");
+    }
+
+
+
     public static MultipartFile convertToMultipartFile(File file) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(file)) {
             return new MockMultipartFile(

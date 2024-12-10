@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import me.yonghwan.myapp.common.codes.SuccessCode;
 import me.yonghwan.myapp.common.response.CommonResponse;
-import me.yonghwan.myapp.domain.Board;
 import me.yonghwan.myapp.domain.Member;
 import me.yonghwan.myapp.domain.Post;
 import me.yonghwan.myapp.domain.Trade;
@@ -19,13 +18,13 @@ import me.yonghwan.myapp.helper.SessionUtil;
 import me.yonghwan.myapp.jwt.JWTUtil;
 import me.yonghwan.myapp.service.MemberService;
 import me.yonghwan.myapp.service.PostService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,6 +36,7 @@ public class PostApiController {
     private final SessionUtil sessionUtil;
     private final JWTUtil jwtUtil;
     private final MemberService memberService;
+
 
     @Operation(summary = "거래 게시물 등록", description = "거래 게시물을 등록합니다.")
     @ApiResponses(value = {
@@ -138,6 +138,26 @@ public class PostApiController {
                 .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
                 .build();
     }
+
+    @Operation(summary = "거래 게시물 리스트", description = "거래 게시물 리스트 조회")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
+            @ApiResponse(responseCode = "400", description = "조회 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
+    })
+    @GetMapping
+    public CommonResponse<Slice<PostListResponse>> getPostList(
+            @Parameter(description = "검색조건")
+            PostSearchRequest searchRequest,
+            @Parameter(description = "페이징")
+            Pageable pageable) {
+
+        return CommonResponse.<Slice<PostListResponse>>builder()
+                .result(postService.searchPostWithSlice(searchRequest,pageable))
+                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
+                .build();
+    }
+
 
 
 
