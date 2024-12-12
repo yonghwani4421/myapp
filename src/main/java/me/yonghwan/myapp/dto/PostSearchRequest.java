@@ -10,7 +10,6 @@ public class PostSearchRequest {
     private String title;
     private String placeName;
     private String tradeType;
-
     private Double priceGoe;
     private Double priceLoe;
 

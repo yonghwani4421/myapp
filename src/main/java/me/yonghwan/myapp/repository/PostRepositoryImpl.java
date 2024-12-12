@@ -3,12 +3,13 @@ package me.yonghwan.myapp.repository;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import me.yonghwan.myapp.domain.Post;
 import me.yonghwan.myapp.domain.QPost;
-import me.yonghwan.myapp.dto.PostListResponse;
-import me.yonghwan.myapp.dto.PostSearchRequest;
-import me.yonghwan.myapp.dto.QPostListResponse;
+import me.yonghwan.myapp.domain.QPostPhoto;
+import me.yonghwan.myapp.dto.*;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static me.yonghwan.myapp.domain.QPost.*;
+import static me.yonghwan.myapp.domain.QPostPhoto.*;
 
 public class PostRepositoryImpl implements PostRepositoryCustom{
 

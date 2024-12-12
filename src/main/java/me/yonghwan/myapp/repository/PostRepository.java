@@ -21,4 +21,6 @@ public interface PostRepository extends JpaRepository<Post, Long>,PostRepository
             " where p.id = :postId")
     Optional<Post> findByIdWithPhotos(@Param("postId") Long postId);
 
+
+
 }

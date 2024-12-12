@@ -147,12 +147,32 @@ public class PostApiController {
     @GetMapping
     public CommonResponse<Slice<PostListResponse>> getPostList(
             @Parameter(description = "검색조건")
-            PostSearchRequest searchRequest,
+            @ModelAttribute PostSearchRequest searchRequest,
             @Parameter(description = "페이징")
             Pageable pageable) {
 
         return CommonResponse.<Slice<PostListResponse>>builder()
                 .result(postService.searchPostWithSlice(searchRequest,pageable))
+                .resultCode(SuccessCode.SELECT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.SELECT_SUCCESS.getMessage())
+                .build();
+    }
+
+    @Operation(summary = "거래 게시물", description = "거래 게시물 조회")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
+            @ApiResponse(responseCode = "400", description = "조회 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
+    })
+    @GetMapping("/{id}")
+    public CommonResponse<PostDetailResponse> getPostDetail(
+            @Parameter(description = "거래 게시물 id")
+            @PathVariable("id") Long postId) {
+
+        Post post = postService.findByIdWithPhotos(postId);
+        Long count = postService.countPostLikesByPost(post);
+
+        return CommonResponse.<PostDetailResponse>builder()
+                .result(post.toDetailResponse(count))
                 .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage())
                 .build();

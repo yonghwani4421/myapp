@@ -41,6 +41,8 @@ class PostServiceTest {
     @Autowired
     PostService postService;
 
+
+
     @Autowired
     S3Service s3Service;
     @Autowired
@@ -221,6 +223,26 @@ class PostServiceTest {
         assertEquals(list.getContent().size(),10, "페이지 크기가 10이어야 합니다.");
         assertTrue(list.hasNext(), "다음 페이지가 있어야 합니다.");
         assertEquals("장기동", list.getContent().get(0).getPlaceName(), "첫 번째 게시물의 장소가 '장기동'이어야 합니다.");
+    }
+
+
+    @Test
+    @DisplayName("거래 게시물 상세조회")
+    public void getPost() throws Exception{
+        // given
+
+        PostSaveRequest request = new PostSaveRequest("title1", "content1", "A", 10000.0, "장기동", 1000.0, 1000.0);
+        Post post = postService.savePostWithAttachment(request.toEntity(m1), Arrays.asList());
+
+        Post findPost = postService.findByIdWithPhotos(post.getId());
+
+        Long count = postService.countPostLikesByPost(findPost);
+
+        // when
+
+        assertEquals(findPost,post);
+        assertEquals(count,0);
+
     }
 
 

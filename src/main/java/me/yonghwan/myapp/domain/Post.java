@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import me.yonghwan.myapp.dto.PostDetailResponse;
+import me.yonghwan.myapp.dto.PostPhotoResponse;
 import me.yonghwan.myapp.dto.PostRequest;
 import me.yonghwan.myapp.dto.PostResponse;
 
@@ -68,6 +70,38 @@ public class Post extends BaseEntity{
                 .price(price)
                 .latitude(latitude)
                 .longitude(longitude)
+                .build();
+    }
+
+
+    public PostDetailResponse toDetailResponse(Long likesCount){
+
+        List<PostPhotoResponse> list = new ArrayList<>();
+        if (photos!=null){
+            photos.stream().forEach(photo -> {
+                list.add(
+                        PostPhotoResponse.builder()
+                                .postPhotoId(photo.getId())
+                                .photoName(photo.getPhotoName())
+                                .photoSize(photo.getPhotoSize())
+                                .photoUrl(photo.getPhotoUrl())
+                                .build()
+                );
+            });
+        }
+
+
+        return PostDetailResponse.builder()
+                .postId(id)
+                .title(title)
+                .content(content)
+                .tradeType(tradeType)
+                .placeName(placeName)
+                .price(price)
+                .latitude(latitude)
+                .longitude(longitude)
+                .photoList(list)
+                .likesCount(likesCount)
                 .build();
     }
 

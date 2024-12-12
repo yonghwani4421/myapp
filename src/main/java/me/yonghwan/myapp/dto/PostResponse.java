@@ -13,7 +13,6 @@ public class PostResponse {
     private String placeName;
     private Double latitude;
     private Double longitude;
-
     @Builder
     public PostResponse(Long id, String title, String content, String tradeType, Double price, String placeName, Double latitude, Double longitude) {
         this.id = id;
