@@ -13,6 +13,7 @@ import me.yonghwan.myapp.common.response.ErrorResponse;
 import me.yonghwan.myapp.common.response.CommonResponse;
 import me.yonghwan.myapp.domain.Keyword;
 import me.yonghwan.myapp.domain.Member;
+import me.yonghwan.myapp.domain.Neighborhoods;
 import me.yonghwan.myapp.dto.*;
 import me.yonghwan.myapp.helper.SessionUtil;
 import me.yonghwan.myapp.repository.MemberRepository;
@@ -130,4 +131,31 @@ public class MemberApiController {
                 .resultCode(SuccessCode.DELETE_SUCCESS.getStatus())
                 .resultMsg(SuccessCode.DELETE_SUCCESS.getMessage()).build();
     }
+
+
+    @Operation(summary = "우리동네 저장", description = "우리동네를 저장합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "저장 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))),
+            @ApiResponse(responseCode = "400", description = "저장 실패", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class)))
+    })
+    @PostMapping("/neighborhoods")
+    public CommonResponse<NeighborhoodsResponse> saveNeighborhoods(@RequestBody NeighborhoodsRequest request) throws Exception {
+        Member member = sessionUtil.getMemberSesson();
+        Neighborhoods neighborhoods = memberService.saveNeighborhoods(request, member);
+
+        return CommonResponse.<NeighborhoodsResponse>builder()
+                .result(
+                        NeighborhoodsResponse.builder()
+                                .id(neighborhoods.getId())
+                                .placeName(neighborhoods.getPlaceName())
+                                .city(neighborhoods.getCity())
+                                .latitude(neighborhoods.getLatitude())
+                                .longitude(neighborhoods.getLongitude())
+                                .zipCode(neighborhoods.getZipCode())
+                                .build()
+                )
+                .resultCode(SuccessCode.INSERT_SUCCESS.getStatus())
+                .resultMsg(SuccessCode.INSERT_SUCCESS.getMessage()).build();
+    }
+
 }

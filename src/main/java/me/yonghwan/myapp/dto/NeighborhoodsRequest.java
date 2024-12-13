@@ -9,7 +9,6 @@ public class NeighborhoodsRequest {
     private String placeName;
     private String city;
     private String zipCode;
-
     private Double latitude;
     private Double longitude;
 
